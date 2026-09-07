@@ -1,0 +1,31 @@
+# dragonkingai.com 华为云 DNS 记录备份
+# 导出时间: 2026-09-07  (迁移到 Cloudflare 之前)
+# 来源: 华为云 云解析服务 DNS 控制台, zone id ff808082955cfe120195883c869424bb
+
+## 需要在 Cloudflare 重建的记录 (8 条)
+类型   名称                                                  值                          TTL
+----   ----                                                  ---                         ---
+A      dragonkingai.com  (根域 @)                             185.199.108.153             300
+A      dragonkingai.com  (根域 @)                             185.199.109.153             300
+A      dragonkingai.com  (根域 @)                             185.199.110.153             300
+A      dragonkingai.com  (根域 @)                             185.199.111.153             300
+CNAME  www                                                   dragonkingwhd.github.io.    300
+A      derp                                                  123.117.180.71              300
+TXT    _github-pages-challenge-dragonkingwhd                 7d929ee0e1236d48e7c809e705edaf  300
+TXT    _acme-challenge.derp                                  ifGfaWDgtcVLhFZbMk9I79SAaA3mSSA5mvRnrTUslY4  300
+
+## 不需要迁移 (Cloudflare 会自动生成自己的)
+NS     dragonkingai.com     ns1.huaweicloud-dns.{org,net,cn,com}
+SOA    dragonkingai.com     ns1.huaweicloud-dns.org. ...
+
+## 迁移后要新增的记录
+CNAME  12123                <Cloudflare Pages 项目>.pages.dev   (走 Pages 自定义域自动创建)
+
+## 注意事项
+- 无 MX 记录 (没有域名邮箱), 迁移无邮件中断风险
+- derp.dragonkingai.com = Tailscale DERP 中继服务器, 指向自建 IP 123.117.180.71
+  该主机用 Let's Encrypt 证书 (_acme-challenge TXT 是证书校验用)
+  ** derp 记录在 Cloudflare 必须设为 "仅DNS/DNS only" (灰云), 不能开橙云代理 **
+  否则 Tailscale DERP 的 TLS/WireGuard 流量会被 Cloudflare 代理破坏
+- 根域 A 和 www CNAME 指向 GitHub Pages, 也建议先设为 "仅DNS" 保持现状,
+  确认解析正常后再考虑是否开代理
