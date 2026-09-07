@@ -58,3 +58,26 @@ Cloudflare 侧记录 (9 条, 全部"仅DNS"灰云):
   derp       DNS 解析正确 (123.117.180.71)
              但 443/3478 端口不通 —— 直连 IP 同样不通,
              故为该家宽主机自身问题, 与 DNS 迁移无关
+
+################################################################
+## 2026-09-07 后续变更：从 Cloudflare Pages 迁到 GitHub Pages
+################################################################
+
+原因：Cloudflare Pages 自定义域强制走橙云代理，落在 104.21.x.x / 172.67.x.x
+      这批 Cloudflare 免费版共享 IP 上，国内 DNS（阿里 223.5.5.5、114）直接
+      解析为空，国内直连访问不了。且该代理无法关闭（产品限制）。
+
+变更：
+  CNAME 12123   12123-plate-helper.pages.dev  橙云代理   <- 旧
+  CNAME 12123   dragonkingwhd.github.io       仅DNS      <- 新
+
+现在 12123 与博客走同一条链路（GitHub Pages, 185.199.x.x），国内可达。
+
+配套改动：
+  - GitHub 仓库 12123-plate-helper 改为 public（免费版 Pages 要求）
+  - 助手页密码从 dragonking 换为强密码（密文公开后防离线爆破）
+  - 入口链接从 /helper 改为 ./helper.html（GitHub Pages 不做无扩展名重写）
+  - 加 .nojekyll 防止 Jekyll 处理
+  - CNAME 文件内容：12123.dragonkingai.com
+
+Cloudflare Pages 项目保留但自定义域已"停用"，仅 pages.dev 地址可用（备用）。
