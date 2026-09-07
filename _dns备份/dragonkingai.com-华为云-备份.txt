@@ -29,3 +29,32 @@ CNAME  12123                <Cloudflare Pages 项目>.pages.dev   (走 Pages 自
   否则 Tailscale DERP 的 TLS/WireGuard 流量会被 Cloudflare 代理破坏
 - 根域 A 和 www CNAME 指向 GitHub Pages, 也建议先设为 "仅DNS" 保持现状,
   确认解析正常后再考虑是否开代理
+
+################################################################
+## 迁移执行记录 — 2026-09-07 完成
+################################################################
+
+NS 已从华为云切换到 Cloudflare:
+  旧: ns1.huaweicloud-dns.{org,net,cn,com}
+  新: dom.ns.cloudflare.com / maria.ns.cloudflare.com
+
+Cloudflare 侧记录 (9 条, 全部"仅DNS"灰云):
+  A     @        185.199.108.153     仅DNS
+  A     @        185.199.109.153     仅DNS
+  A     @        185.199.110.153     仅DNS
+  A     @        185.199.111.153     仅DNS
+  CNAME www      dragonkingwhd.github.io    仅DNS
+  A     derp     123.117.180.71      仅DNS   <- Tailscale DERP, 绝不可开橙云代理
+  TXT   _github-pages-challenge-dragonkingwhd   "7d929ee0e1236d48e7c809e705edaf"
+  TXT   _acme-challenge.derp   "ifGfaWDgtcVLhFZbMk9I79SAaA3mSSA5mvRnrTUslY4"
+  CNAME 12123    12123-plate-helper.pages.dev   <- 新增, Pages 自动创建
+
+!! 重要: Cloudflare 自动扫描只找到 2 条 (根域A + www CNAME), 漏了 6 条。
+   其余 6 条是手工按本备份补的。以后再迁移域名务必逐条核对, 不要信任自动扫描。
+
+迁移后验证:
+  博客根域   HTTP 200 正常
+  www        HTTP 301 正常跳转
+  derp       DNS 解析正确 (123.117.180.71)
+             但 443/3478 端口不通 —— 直连 IP 同样不通,
+             故为该家宽主机自身问题, 与 DNS 迁移无关
