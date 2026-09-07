@@ -106,3 +106,41 @@ Cloudflare Pages 项目保留但自定义域已"停用"，仅 pages.dev 地址�
 
 注意：GitHub Pages 官方就推荐自定义域用这 4 个 A 记录（apex 域标准做法），
       CNAME 只是子域的另一种选择。对国内网络环境，A 记录更可靠。
+
+################################################################
+## 2026-09-07 最终定位：子域名 "12123" 被国内 DNS 拦截
+################################################################
+
+★ 这是本次所有访问问题的真正根因 ★
+
+决定性证据 —— 同一 zone、同样 4 条 A 记录、同样的 IP，只有名字不同：
+
+  名字                        阿里DNS      腾讯DNS
+  dragonkingai.com            NOERROR ✅   -
+  www.dragonkingai.com        NOERROR ✅   -
+  derp.dragonkingai.com       NOERROR ✅   -
+  12123.dragonkingai.com      NXDOMAIN ❌  NXDOMAIN ❌
+  num.dragonkingai.com        NOERROR ✅   NOERROR ✅   <- 换名字后立刻正常
+
+"12123" 是交管12123（公安部政务服务平台）的官方标识，该字符串在国内
+DNS 层面被拦截，返回 NXDOMAIN（域名不存在），浏览器报
+ERR_NAME_NOT_RESOLVED。这与 IP、证书、CNAME/A 记录类型、Cloudflare
+或 GitHub 都无关——纯粹是子域名字符串本身触发的过滤。
+
+同类被拦截的还有 12123.gov.cn 等（实测同样 NXDOMAIN）。
+
+最终方案：子域名改为 num.dragonkingai.com
+  A  num  185.199.108.153  仅DNS
+  A  num  185.199.109.153  仅DNS
+  A  num  185.199.110.153  仅DNS
+  A  num  185.199.111.153  仅DNS
+
+GitHub Pages 自定义域同步改为 num.dragonkingai.com（CNAME 文件已更新）。
+
+--- 排查过程中走过的弯路（供以后参考）---
+1. 先怀疑 Cloudflare Pages 的 IP 被墙 -> 确实是问题之一，已换 GitHub Pages
+2. 再怀疑 CNAME 依赖 github.io 解析不了 -> 改成 A 记录，仍不通
+3. 最后对比同 zone 不同名字的 DNS 状态码，才定位到是 "12123" 这个字符串
+   教训：遇到"域名解析不了"，第一步就该看 DNS 响应状态码（NXDOMAIN vs
+   NOERROR），并用同 zone 的其他名字做对照，能直接区分"配置问题"和
+   "名字被拦截"。
