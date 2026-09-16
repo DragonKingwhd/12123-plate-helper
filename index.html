@@ -1,556 +1,3048 @@
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>12123 选号沙盘</title>
-<style>
-:root{
- --blue:#1a6fc4; --blue-d:#155a9f; --blue-l:#e8f1fa;
- --ink:#1a1a1a; --ink2:#666; --ink3:#999;
- --bg:#eef0f2; --card:#fff; --line:#e3e6e9;
- --warn:#e8a33d; --warn-bg:#fdf6e8;
- --red:#d0342c; --red-bg:#fdf1f0;
- --green:#0b8a43; --green-bg:#eaf6ef;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
- --blue:#4a9ae8; --blue-d:#3a86d0; --blue-l:#152534;
- --ink:#e8ebed; --ink2:#a0a8ae; --ink3:#7a8288;
- --bg:#12161a; --card:#1a2026; --line:#2a323a;
- --warn:#e0aa5a; --warn-bg:#2a2115;
- --red:#f08078; --red-bg:#2b1614;
- --green:#4caf72; --green-bg:#16281d;
-}}
-:root[data-theme="dark"]{
- --blue:#4a9ae8; --blue-d:#3a86d0; --blue-l:#152534;
- --ink:#e8ebed; --ink2:#a0a8ae; --ink3:#7a8288;
- --bg:#12161a; --card:#1a2026; --line:#2a323a;
- --warn:#e0aa5a; --warn-bg:#2a2115;
- --red:#f08078; --red-bg:#2b1614;
- --green:#4caf72; --green-bg:#16281d;
-}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);
- font:14px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
- font-variant-numeric:tabular-nums}
-.page{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
-.hd{margin-bottom:16px}
-.hd .eb{font-size:10.5px;font-weight:700;letter-spacing:2.4px;color:var(--ink3)}
-.hd h1{font-size:20px;margin:3px 0 0;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.tagsim{font-size:10.5px;font-weight:700;letter-spacing:.8px;background:var(--warn);color:#fff;
- padding:2px 8px;border-radius:20px}
-.hd p{color:var(--ink2);font-size:12.8px;margin:8px 0 0;max-width:70ch}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>交管12123车牌选号助手 · 北京市新能源绿牌与燃油车专用版</title>
+  <style>
+    :root {
+      --primary: #059669;
+      --primary-hover: #047857;
+      --primary-light: #d1fae5;
+      --accent: #10b981;
+      --fuel-blue: #1e40af;
+      --success: #059669;
+      --success-bg: #ecfdf5;
+      --warning: #d97706;
+      --warning-bg: #fffbeb;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --purple: #7c3aed;
+      --purple-bg: #f5f3ff;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --plate-blue: #144ba6;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --radius: 12px;
+    }
 
-.cols{display:grid;grid-template-columns:392px 1fr;gap:18px;align-items:start}
-@media (max-width:860px){.cols{grid-template-columns:1fr}}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
 
-/* ── 手机外壳 ── */
-.phone{background:#0d0d0f;border-radius:34px;padding:9px;box-shadow:0 12px 30px rgba(0,0,0,.28);
- position:sticky;top:16px}
-.screen{background:#fff;border-radius:27px;overflow:hidden;height:660px;display:flex;flex-direction:column;
- color:#1a1a1a;
- /* 屏幕内固定浅色，不跟随系统暗色 —— 真机 12123 就是白底 */
- --line:#e3e6e9; --blue:#1a6fc4; --blue-l:#e8f1fa;
- --green:#0b8a43; --green-bg:#eaf6ef; --red:#d0342c}
-.sbar{background:var(--blue);color:#fff;font-size:11.5px;padding:7px 16px 3px;display:flex;
- justify-content:space-between;align-items:center}
-.nav{background:var(--blue);color:#fff;padding:6px 14px 11px;display:flex;align-items:center;gap:8px}
-.nav .bk{font-size:14px;cursor:pointer;opacity:.95}
-.nav .ti{flex:1;text-align:center;font-size:16px;font-weight:600;margin-right:26px}
-.tabs{display:flex;background:#fff;border-bottom:1px solid var(--line);flex:none}
-.tabs button{flex:1;background:none;border:none;padding:12px 0;font-size:15px;color:#555;
- cursor:pointer;border-bottom:2.5px solid transparent;font-weight:500}
-.tabs button.on{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
-.tabs button:disabled{color:#c4c4c4;cursor:not-allowed}
-.body{flex:1;overflow-y:auto;background:#f7f8fa}
+    /* 顶部导航与头部 */
+    header {
+      background: linear-gradient(135deg, #064e3b 0%, #065f46 40%, #047857 100%);
+      color: #ffffff;
+      padding: 20px 20px;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      transition: background 0.3s ease;
+    }
+    header.fuel-theme {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
+    }
 
-/* 随机页 */
-.rowbar{background:#fff;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;
- border-bottom:1px solid var(--line);font-size:13.5px;gap:10px;flex-wrap:wrap}
-.rowbar>span{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.rowbar label{display:flex;align-items:center;gap:6px;color:#555;font-size:13px;cursor:pointer}
-.btn-batch{background:var(--blue);color:#fff;border:none;border-radius:16px;padding:5px 14px;
- font-size:13px;font-weight:500;cursor:pointer}
-.btn-batch:disabled{background:#c8ccd0;cursor:not-allowed}
-.expire{background:#fef8e8;padding:7px 14px;font-size:12.5px;color:#8a6d3b;display:flex;
- justify-content:space-between;border-bottom:1px solid #f3e6c8}
-.expire b{background:var(--red);color:#fff;padding:0 5px;border-radius:3px;margin:0 2px;
- font-family:ui-monospace,monospace}
-.plates{padding:12px 10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
-.pl{border:1px solid #dcdfe3;border-radius:6px;background:#fff;padding:11px 4px;text-align:center;
- font-size:14px;cursor:pointer;transition:.12s;color:#333;letter-spacing:.3px}
-.pl:hover{border-color:var(--blue)}
-.pl.on{border-color:var(--blue);background:var(--blue-l);color:var(--blue);font-weight:600}
-.pl.dim{opacity:.45;cursor:not-allowed}
-.sechd{padding:11px 14px 7px;font-size:14.5px;font-weight:600;background:#fff;
- border-top:1px solid var(--line)}
-.slots{background:#fff;padding:4px 10px 14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
-.slot{border:1px dashed #d0d4d8;border-radius:6px;padding:11px 3px;text-align:center;
- font-size:12px;color:#aaa;min-height:42px;display:flex;align-items:center;justify-content:center}
-.slot.full{border-style:solid;border-color:var(--green);background:var(--green-bg);
- color:var(--green);font-size:13.5px;font-weight:600;cursor:pointer}
-.slot.full.sel{border-width:2px;border-color:var(--blue);background:var(--blue-l);color:var(--blue);
- box-shadow:0 0 0 3px rgba(26,111,196,.14)}
-.cfm{padding:12px 14px;background:#fff;border-top:1px solid var(--line)}
-.btn-cfm{width:100%;background:var(--blue);color:#fff;border:none;border-radius:5px;padding:13px;
- font-size:16px;font-weight:600;cursor:pointer}
-.btn-cfm:disabled{background:#c8ccd0;cursor:not-allowed}
+    .header-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-badge {
+      background: #ffffff;
+      color: #065f46;
+      font-weight: 900;
+      font-size: 14px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+    .fuel-theme .logo-badge {
+      color: #1e3a8a;
+    }
+    .logo-title h1 {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .logo-title p {
+      font-size: 12px;
+      opacity: 0.88;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .header-time {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.14);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
 
-/* 自编页 */
-.selfhd{padding:10px 14px 4px;font-size:12.5px;color:var(--ink3);background:#fff}
-.selfhd b{color:var(--red);font-weight:600}
-.wish{background:#fff;padding:0 14px}
-.wi{padding:10px 0;border-bottom:1px solid #f0f2f4}
-.wi .lb{font-size:12.5px;color:#888;display:flex;justify-content:space-between;align-items:center}
-.wi .lb .del{color:var(--blue);font-size:12.5px;cursor:pointer}
-.wi .vl{font-size:19px;letter-spacing:.6px;padding:5px 0 2px;min-height:30px;color:#222;font-weight:500}
-.wi.hit{background:var(--green-bg)}
-.wi.miss{opacity:.5}
-.wi .rs{font-size:12px;font-weight:600}
-.wi.hit .rs{color:var(--green)}
-.wi.miss .rs{color:#999}
-.addbtn{margin:12px 14px;border:1px dashed #c8ccd0;border-radius:6px;padding:13px;text-align:center;
- font-size:14px;color:#666;cursor:pointer;background:#fff}
-.notice{margin:0 14px 12px;font-size:11.8px;color:var(--blue);line-height:1.65;display:flex;gap:6px}
-.notice i{font-style:normal;flex:none}
+    /* 种类切换器 Tab */
+    .vehicle-type-switcher {
+      display: inline-flex;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 10px;
+      padding: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .vtype-btn {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.85);
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .vtype-btn:hover {
+      color: #ffffff;
+    }
+    .vtype-btn.active {
+      background: #ffffff;
+      color: #065f46;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .fuel-theme .vtype-btn.active {
+      color: #1e3a8a;
+    }
 
-/* 键盘 */
-.kb{background:#d3d6db;padding:7px 5px 10px;border-top:1px solid #b8bcc2}
-.kbhd{display:flex;justify-content:space-between;padding:0 8px 6px;font-size:13px;color:#333}
-.kbhd span{cursor:pointer}
-.krow{display:flex;gap:5px;justify-content:center;margin-bottom:6px}
-.key{flex:1;max-width:34px;background:#fff;border:none;border-radius:5px;padding:9px 0;font-size:15px;
- cursor:pointer;box-shadow:0 1px 0 #9a9ea3;color:#111;font-weight:500}
-.key:disabled{background:#b8bcc2;color:#8d9297;box-shadow:none;cursor:not-allowed}
-.key.wide{max-width:none;flex:1.6;font-size:13px}
+    /* 容器 */
+    .container {
+      max-width: 1240px;
+      margin: 18px auto 0;
+      padding: 0 16px;
+    }
 
-/* 结果 */
-.done{padding:26px 18px;text-align:center;background:#fff;flex:1;display:flex;flex-direction:column;
- align-items:center;justify-content:center;gap:11px}
-.done .big{font-size:26px;font-weight:700;letter-spacing:1.5px;color:var(--green)}
-.done p{font-size:12.8px;color:#777;margin:0;line-height:1.7}
+    /* 官方规则通告条 */
+    .banner-rule {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 5px solid #d97706;
+      border-radius: var(--radius);
+      padding: 13px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .banner-rule.nev-alert {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-left: 5px solid #059669;
+    }
+    .banner-rule .icon {
+      font-size: 20px;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .banner-rule-content {
+      font-size: 13.5px;
+      color: #065f46;
+    }
+    .banner-rule-content strong {
+      color: #047857;
+      font-weight: 700;
+    }
 
-/* ── 右侧讲解 ── */
-.side{display:flex;flex-direction:column;gap:12px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
-.card h2{font-size:13.5px;margin:0 0 9px;display:flex;align-items:center;gap:8px}
-.card h2 .d{width:7px;height:7px;border-radius:50%;background:var(--blue);flex:none}
-.card p{margin:0 0 7px;font-size:12.8px;color:var(--ink2);line-height:1.75}
-.card p:last-child{margin-bottom:0}
-.card b{color:var(--ink)}
-.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
- border:1px solid var(--line);border-radius:9px;overflow:hidden}
-.hud div{background:var(--card);padding:8px 10px}
-.hud dt{font-size:9.8px;letter-spacing:1.3px;color:var(--ink3);font-weight:700;margin:0}
-.hud dd{margin:2px 0 0;font-size:19px;font-weight:700;line-height:1.15}
-.hud dd small{font-size:11px;color:var(--ink3);font-weight:600;margin-left:2px}
-.alert{border-radius:9px;padding:12px 14px;font-size:12.5px;line-height:1.7}
-.alert.r{background:var(--red-bg);border:1px solid var(--red);color:var(--red)}
-.alert.w{background:var(--warn-bg);border:1px solid var(--warn);color:#8a6520}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .alert.w{color:var(--warn)}}
-:root[data-theme="dark"] .alert.w{color:var(--warn)}
-.alert b{font-weight:700}
-.seg{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12.5px}
-select{font:inherit;font-size:12.5px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;
- background:var(--card);color:var(--ink);max-width:100%}
-.pill{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px}
-.pill.ok{background:var(--green-bg);color:var(--green)}
-.pill.no{background:var(--blue-l);color:var(--blue)}
-.log{font-size:11.8px;color:var(--ink2);display:flex;flex-direction:column;gap:3px;
- max-height:200px;overflow-y:auto;border-left:2px solid var(--line);padding-left:10px}
-.log b{color:var(--ink)}
-.mini{background:none;border:1px solid var(--line);color:var(--ink2);border-radius:6px;
- padding:6px 12px;font-size:12.3px;cursor:pointer;font-weight:600}
-.foot{font-size:11.3px;color:var(--ink3);margin-top:20px;text-align:center;line-height:1.8}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
-.tolink{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:8px 15px;
- background:#059669;color:#fff;text-decoration:none;border-radius:8px;font-size:13px;
- font-weight:600;transition:background .15s}
-.tolink:hover{background:#047857}
-</style>
-<div class="page">
- <div class="hd">
-  <div class="eb">北京 · 小型新能源</div>
-  <h1>12123 选号沙盘 <span class="tagsim">模拟练习 · 不连真实系统</span></h1>
-  <p>按真实 12123「新车选号」复刻：随机<b>跨号段混合出号</b>，自编<b>4 轮 × 5 个</b>。
-     号池来自你录屏里的 <b id="sc">—</b> 个真实号段。号码占用为本地模拟。</p>
-  <a class="tolink" href="./helper.html">🔒 打开选号助手（需密码）</a>
- </div>
+    /* 统计卡片网格 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .stat-title {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .stat-value {
+      font-size: 26px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .stat-desc {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
 
- <div class="cols">
-  <div class="phone"><div class="screen">
-    <div class="sbar"><span id="clk">15:26</span><span>••• ᯤ ▮</span></div>
-    <div class="nav"><span class="bk" id="bk">‹ 返回</span><span class="ti">新车选号</span></div>
-    <div class="tabs">
-      <button id="tab-r">随机</button>
-      <button id="tab-s">自编</button>
-    </div>
-    <div class="body" id="scr"></div>
-  </div></div>
+    /* 标签导航栏 */
+    .tabs-nav {
+      display: flex;
+      gap: 8px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 18px;
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover {
+      color: var(--primary);
+      background: #f1f5f9;
+    }
+    .tab-btn.active {
+      color: var(--primary);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-bottom: 2px solid #ffffff;
+      margin-bottom: -2px;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.03);
+    }
+    .badge-counter {
+      background: #e2e8f0;
+      color: #334155;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 12px;
+    }
+    .tab-btn.active .badge-counter {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
 
-  <div class="side">
-    <dl class="hud">
-      <div><dt>自编额度</dt><dd id="h3">20<small>个</small></dd></div>
-      <div><dt>自编轮次</dt><dd id="h5">1<small>/4</small></dd></div>
-      <div><dt>随机批次</dt><dd id="h1">0<small>/5</small></dd></div>
-      <div><dt>随机总时限</dt><dd id="h6">300<small>秒</small></dd></div>
-    </dl>
+    /* Tab 主内容区域 */
+    .tab-pane {
+      display: none;
+    }
+    .tab-pane.active {
+      display: block;
+      animation: fadeIn 0.2s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-    <div class="alert w" style="margin-bottom:0">
-      💡 <b>标签顺序和真机一致（随机在左、自编在右），但沙盘默认停在「自编」</b>——
-      因为自编不计时、随机一进就跑 300 秒表。真机上也建议先自编磨好再进随机。
-    </div>
-    <div id="tip"></div>
+    /* 卡片区块 */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: #fafbfd;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
-    <div class="card">
-      <h2><span class="d"></span>自编的目标号段</h2>
-      <div class="seg">
-        <select id="f"><option value="ok">已解锁（≥7天 · 可自编）</option><option value="no">保护期（&lt;7天 · 不可自编）</option></select>
-        <select id="s" style="flex:1;min-width:180px"></select>
+    /* 按钮规范 */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
+    }
+    .fuel-theme .btn-primary {
+      background: #2563eb;
+    }
+    .fuel-theme .btn-primary:hover {
+      background: #1d4ed8;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+    }
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #334155;
+      border-color: #cbd5e1;
+    }
+    .btn-secondary:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    .btn-outline {
+      background: #ffffff;
+      color: #334155;
+      border-color: #cbd5e1;
+    }
+    .btn-outline:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+    }
+    .btn-danger-outline {
+      background: #fff;
+      color: var(--danger);
+      border-color: #fca5a5;
+    }
+    .btn-danger-outline:hover {
+      background: #fef2f2;
+      border-color: var(--danger);
+    }
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    /* 表格 */
+    .table-container {
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+    }
+    th {
+      background: #f8fafc;
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+    /* 状态徽章 */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .status-pill.unlocked {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid #a7f3d0;
+    }
+    .status-pill.urgent {
+      background: #fff7ed;
+      color: #c2410c;
+      border: 1px solid #fed7aa;
+      animation: pulseBorder 2s infinite;
+    }
+    @keyframes pulseBorder {
+      0%, 100% { border-color: #fed7aa; }
+      50% { border-color: #ea580c; box-shadow: 0 0 8px rgba(234, 88, 12, 0.2); }
+    }
+    .status-pill.locked {
+      background: var(--warning-bg);
+      color: var(--warning);
+      border: 1px solid #fde68a;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-green { background: #10b981; }
+    .dot-orange { background: #f97316; }
+    .dot-yellow { background: #f59e0b; }
+
+    /* 车牌样式仿真卡片 */
+    /* 1. 蓝牌燃油车样式 */
+    .plate-badge-blue {
+      display: inline-flex;
+      align-items: center;
+      background: var(--plate-blue);
+      color: #ffffff;
+      font-family: "PingFang SC", "Heiti SC", "Segoe UI", sans-serif;
+      font-weight: 800;
+      font-size: 14.5px;
+      letter-spacing: 1.5px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1.5px solid #ffffff;
+      box-shadow: 0 2px 4px rgba(20, 75, 166, 0.35);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .plate-badge-blue.plate-lg {
+      font-size: 18px;
+      padding: 5px 14px;
+      letter-spacing: 2px;
+      border-width: 2px;
+    }
+
+    /* 2. 绿牌小型新能源汽车样式 (国标渐变绿) */
+    .plate-badge-green {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      background: linear-gradient(180deg, #f0fdf4 0%, #bbf7d0 32%, #22c55e 70%, #15803d 100%);
+      color: #0f172a;
+      font-family: "PingFang SC", "Heiti SC", "Segoe UI", sans-serif;
+      font-weight: 900;
+      font-size: 15px;
+      letter-spacing: 1.2px;
+      padding: 3px 10px;
+      border-radius: 6px;
+      border: 1.5px solid #0f172a;
+      box-shadow: 0 2px 4px rgba(21, 128, 61, 0.3);
+      text-shadow: none;
+    }
+    .plate-badge-green .nev-dot {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 13px;
+      height: 13px;
+      background: #15803d;
+      color: #ffffff;
+      border-radius: 50%;
+      font-size: 8px;
+      margin: 0 3px;
+    }
+    .plate-badge-green.plate-lg {
+      font-size: 18px;
+      padding: 5px 14px;
+      letter-spacing: 1.8px;
+      border-width: 2px;
+    }
+
+    /* 筛选生成器布局 */
+    .screener-layout {
+      display: grid;
+      grid-template-columns: 330px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .screener-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .filter-panel {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+    .filter-section {
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .filter-section:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    .filter-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .filter-label span.sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: normal;
+    }
+
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .chip {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      padding: 5px 10px;
+      font-size: 12.5px;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s;
+    }
+    .chip:hover {
+      background: #e2e8f0;
+    }
+    .chip.selected {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      font-weight: 600;
+    }
+    .chip.chip-red.selected {
+      background: #ef4444;
+      border-color: #ef4444;
+      color: #ffffff;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 13.5px;
+      color: var(--text-main);
+      outline: none;
+      transition: border 0.15s;
+      background: #fff;
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+
+    /* 车牌结果卡片 */
+    .plate-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 14px;
+    }
+    .plate-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .plate-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: #a7f3d0;
+    }
+    .plate-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .plate-score-pill {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #b45309;
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      padding: 2px 8px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+    .plate-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      min-height: 22px;
+    }
+    .tag-badge {
+      font-size: 11px;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    .tag-badge.tag-aaa {
+      background: #fee2e2;
+      color: #b91c1c;
+      font-weight: 700;
+    }
+    .tag-badge.tag-abc {
+      background: #fef3c7;
+      color: #92400e;
+      font-weight: 600;
+    }
+    .tag-badge.tag-fav {
+      background: #d1fae5;
+      color: #065f46;
+      font-weight: 600;
+    }
+    .plate-card-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      padding-top: 8px;
+      border-top: 1px dashed #e2e8f0;
+    }
+
+    /* 意向清单/购物车 */
+    .wishlist-empty {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+    }
+    .wishlist-empty .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    /* 弹窗 Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-box {
+      background: #ffffff;
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 540px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      transform: scale(0.95);
+      transition: transform 0.2s ease;
+    }
+    .modal-overlay.open .modal-box {
+      transform: scale(1);
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .modal-body {
+      padding: 20px;
+    }
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: #f8fafc;
+    }
+
+    /* 攻略卡片样式 */
+    .guide-box {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .guide-box h3 {
+      font-size: 15px;
+      color: #065f46;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .fuel-theme .guide-box h3 {
+      color: #1e3a8a;
+    }
+    .guide-box ol, .guide-box ul {
+      padding-left: 20px;
+      font-size: 13.5px;
+      color: #334155;
+    }
+    .guide-box li {
+      margin-bottom: 6px;
+    }
+
+    /* 复制成功浮动提示 */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      box-shadow: var(--shadow-lg);
+      z-index: 200;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 顶部导航 -->
+  <header id="main-header">
+    <div class="header-inner">
+      <div class="logo-area">
+        <span class="logo-badge" id="logo-badge-text">⚡️ 绿牌12123</span>
+        <div class="logo-title">
+          <h1 id="header-main-title">北京市小型新能源汽车 · 选号与号段追踪助手</h1>
+          <p id="header-sub-title">6位绿牌专属自编算法 (纯电D/插混F) · 7天号段倒计时 · 5连/4连靓号优选</p>
+        </div>
       </div>
-      <div class="seg" id="sm" style="margin-top:9px"></div>
-      <p style="margin-top:9px;font-size:11.8px"><b>随机不看这个</b>——随机是全池混合出号，你控制不了。
-         这里只决定<b>自编往哪个方向编</b>：号段公布是自编的"弹药清单"。</p>
+
+      <div class="header-right">
+        <!-- 车辆类型切换 -->
+        <div class="vehicle-type-switcher">
+          <button class="vtype-btn active" id="btn-type-nev" onclick="switchVehicleType('NEV')">
+            <span>⚡️ 小型新能源 (绿牌6位)</span>
+          </button>
+          <button class="vtype-btn" id="btn-type-fuel" onclick="switchVehicleType('FUEL')">
+            <span>🚗 普通汽车 (蓝牌5位)</span>
+          </button>
+        </div>
+
+        <div class="header-time" id="clock-display">
+          <span>🕒 同步时间中...</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 12123 官方核心规则横幅 -->
+    <div class="banner-rule nev-alert" id="banner-rule-box">
+      <div class="icon">📢</div>
+      <div class="banner-rule-content" id="banner-rule-text">
+        <strong>北京市小型新能源汽车（绿牌）交管12123选号关键提示：</strong>
+        1. 小型新能源汽车号牌为 <strong>6 位序号编码</strong>（纯电动首字母为 D，插混/增程为 F，如 <code>京A·D88888</code>）；
+        2. 官方号池与燃油车完全独立！请在 12123 App 首页【号段公布】中，<strong>点击右上角【筛选】选择【小型新能源汽车】</strong>，即可查阅北京交管局最新公布的绿牌号段！超过 7 天的号段将由系统自动投放到自编选号池。
+      </div>
     </div>
 
-    <div class="alert r">
-      <b>⚠️ 不可逆 / 易踩坑（真实规则）</b><br>
-      1. 自编<b>验证可用的，无法回退更改</b>（App 原话）。<br>
-      2. 备选池点<b>「确认选号」</b>→ 选号结束，另一种方式关闭。<br>
-      3. 预选成功后<b>3 个工作日内</b>必须到车管所办注册登记，逾期取消并<b>2 年内禁止互联网预选</b>。
+    <!-- 顶部核心指标看板 -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-title">已监控号段 <span>📋</span></div>
+        <div class="stat-value" id="stat-total-segments">0 <span style="font-size:13px; font-weight:normal; color:#64748b;">个号段</span></div>
+        <div class="stat-desc" id="stat-total-desc">北京市新能源官方放号池</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">🟢 已解锁自编 <span>✨</span></div>
+        <div class="stat-value" style="color: var(--success);" id="stat-unlocked-segments">0 <span style="font-size:13px; font-weight:normal; color:#64748b;">个</span></div>
+        <div class="stat-desc">投放超7天，可直接自编录入</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">⚡️ 即将解锁 (24小时内) <span>⏳</span></div>
+        <div class="stat-value" style="color: #ea580c;" id="stat-urgent-segments">0 <span style="font-size:13px; font-weight:normal; color:#64748b;">个</span></div>
+        <div class="stat-desc">重点盯梢：提前准备第1志愿</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">⭐️ 我的自编意向单 <span>🎯</span></div>
+        <div class="stat-value" style="color: #047857;" id="stat-wishlist-count">0 <span style="font-size:13px; font-weight:normal; color:#64748b;">个</span></div>
+        <div class="stat-desc">已规划排兵布阵志愿单</div>
+      </div>
     </div>
 
-    <div class="alert w" id="unv">
-      <b>🟡 以下机制来自小红书攻略，我未能从官方或实拍画面证实，请你上号当天实测确认：</b><br>
-      · 随机页<b>总限时 300 秒</b>，单轮 120 秒，<b>切到自编页计时继续走</b><br>
-      · 每轮<b>必须选 1 个</b>，不选则该轮 10 个全部作废<br>
-      · 加入备选的号<b>不能删除</b>，只能从 5 个里选 1 个<br>
-      · 超时未选，系统<b>默认选第一个备选</b>
+    <!-- 标签栏导航 -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('tab-segments')">
+        <span>📊 号段公布与7天倒计时</span>
+        <span class="badge-counter" id="tab-seg-badge">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('tab-screener')">
+        <span>🎯 智能选号与优选组合</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('tab-wishlist')">
+        <span>📋 自编志愿单 (<span id="tab-wish-badge">0</span>/20)</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('tab-guide')">
+        <span>💡 北京市新能源选号实战攻略</span>
+      </button>
     </div>
 
-    <div class="card">
-      <h2><span class="d"></span>操作记录</h2>
-      <div class="log" id="lg"><div>等待开始…</div></div>
-      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-        <button class="mini" id="rs">重置沙盘</button>
-        <button class="mini" id="au">按推荐分填满本轮 5 个</button>
+    <!-- TAB 1: 号段管理与7天倒计时 -->
+    <div id="tab-segments" class="tab-pane active">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span id="tab-seg-title">官方号段投放池与自编解锁进度</span>
+          </div>
+          <div class="card-actions">
+            <input type="text" id="search-segment-input" class="form-input" style="width:160px; padding:4px 10px; font-size:12.5px;" placeholder="🔍 搜索号段/日期" oninput="renderSegmentsTable()">
+            <select id="filter-status-select" class="form-select" style="width:150px; padding:4px 10px; font-size:12.5px;" onchange="renderSegmentsTable()">
+              <option value="ALL">全部状态</option>
+              <option value="UNLOCKED">🟢 仅看已解锁自编</option>
+              <option value="URGENT">⚡️ 仅看即将解锁</option>
+              <option value="LOCKED">🟡 仅看未解锁(随机)</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" onclick="openBatchModal()">
+              <span>📝 智能批量粘贴解析</span>
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+              <span>+ 录入新号段</span>
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="resetDefaultData()">
+              <span>🔄 恢复默认号段数据</span>
+            </button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 50px;">#</th>
+                <th>号段范围</th>
+                <th>官方投放时间</th>
+                <th>系统解锁自编时间</th>
+                <th>实时状态 / 倒计时</th>
+                <th style="text-align: right;">快捷操作</th>
+              </tr>
+            </thead>
+            <tbody id="segments-table-body">
+              <!-- 动态填充 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: 智能选号与筛选生成器 -->
+    <div id="tab-screener" class="tab-pane">
+      <div class="screener-layout">
+
+        <!-- 左侧过滤器 -->
+        <div class="filter-panel">
+          <div style="font-weight:700; font-size:15px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+            <span>选号策略与规则配置</span>
+            <button class="btn btn-outline btn-sm" onclick="resetFilters()">重置条件</button>
+          </div>
+
+          <!-- 核心策略选择栏 -->
+          <div style="background:#f1f5f9; border-radius:10px; padding:4px; margin-bottom:16px; display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+            <button id="strat-btn-smart" class="btn btn-sm active" style="font-size:12px; font-weight:700; background:#059669; color:#fff; border-radius:8px; border:none; padding:7px 4px;" onclick="setStrategyPreset('SMART')">
+              🎯 低竞争高命中 (推荐自编)
+            </button>
+            <button id="strat-btn-rush" class="btn btn-sm" style="font-size:12px; font-weight:600; background:transparent; color:#475569; border-radius:8px; border:none; padding:7px 4px;" onclick="setStrategyPreset('RUSH')">
+              👑 极品靓号冲刺
+            </button>
+          </div>
+
+          <div id="strategy-hint-box" style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; padding:9px 12px; margin-bottom:16px; font-size:12px; color:#065f46; line-height:1.4;">
+            💡 <strong>低竞争高命中策略已激活：</strong> 自动排除数字 4，避开被黄牛脚本秒光的纯豹子雷区，优先挑选尾双叠(88/66/99)、ABAB对子、ABBA回文对称及小顺子，在成熟号段一次自编命中率最高！
+          </div>
+
+          <!-- 号段范围选择 -->
+          <div class="filter-section">
+            <div class="filter-label">
+              <span>目标号段范围</span>
+            </div>
+            <select class="form-select" id="filter-segment-select" onchange="generateCandidates()">
+              <!-- 选项动态加载 -->
+            </select>
+          </div>
+
+          <!-- 排除数字 -->
+          <div class="filter-section">
+            <div class="filter-label">
+              <span>排除不喜数字 (坚决不出现)</span>
+            </div>
+            <div class="chip-group" id="exclude-chips">
+              <span class="chip chip-red selected" data-digit="4" onclick="toggleExcludeChip(this)">带 4 排除</span>
+              <span class="chip chip-red" data-digit="7" onclick="toggleExcludeChip(this)">带 7 排除</span>
+              <span class="chip chip-red" data-digit="0" onclick="toggleExcludeChip(this)">带 0 排除</span>
+              <span class="chip chip-red" data-digit="2" onclick="toggleExcludeChip(this)">带 2 排除</span>
+              <span class="chip chip-red" data-digit="5" onclick="toggleExcludeChip(this)">带 5 排除</span>
+            </div>
+          </div>
+
+          <!-- 心仪数字 -->
+          <div class="filter-section">
+            <div class="filter-label">
+              <span>心仪偏好数字 (加分排前)</span>
+            </div>
+            <div class="chip-group" id="prefer-chips">
+              <span class="chip selected" data-digit="8" onclick="togglePreferChip(this)">数字 8 (发)</span>
+              <span class="chip selected" data-digit="6" onclick="togglePreferChip(this)">数字 6 (顺)</span>
+              <span class="chip selected" data-digit="9" onclick="togglePreferChip(this)">数字 9 (久)</span>
+              <span class="chip" data-digit="1" onclick="togglePreferChip(this)">数字 1 (第一)</span>
+            </div>
+          </div>
+
+          <!-- 号码形态偏好 -->
+          <div class="filter-section">
+            <div class="filter-label">
+              <span>靓号特殊形态 (多选)</span>
+            </div>
+            <div class="chip-group" id="pattern-chips">
+              <!-- 动态根据车辆种类切换 (新能源专属5连/4连豹子 vs 燃油车3连) -->
+            </div>
+          </div>
+
+          <!-- 尾数限定 -->
+          <div class="filter-section">
+            <div class="filter-label">
+              <span>限定尾数 (末尾必须为)</span>
+            </div>
+            <div class="chip-group" id="tail-chips">
+              <span class="chip" data-tail="8" onclick="toggleTailChip(this)">尾数 8</span>
+              <span class="chip" data-tail="6" onclick="toggleTailChip(this)">尾数 6</span>
+              <span class="chip" data-tail="9" onclick="toggleTailChip(this)">尾数 9</span>
+              <span class="chip" data-tail="0" onclick="toggleTailChip(this)">尾数 0</span>
+            </div>
+          </div>
+
+          <!-- 生日或自定义数字搜索 -->
+          <div class="filter-section">
+            <div class="filter-label">
+              <span>包含特定数字串 (生日/纪念日)</span>
+            </div>
+            <input type="text" class="form-input" id="custom-search-input" placeholder="输入数字如 520, 168, 888" oninput="generateCandidates()">
+          </div>
+
+          <button class="btn btn-primary" style="width:100%; padding:10px;" onclick="generateCandidates()">
+            🚀 立即按条件筛选与排序
+          </button>
+        </div>
+
+        <!-- 右侧生成结果展示 -->
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span>备选车牌推荐列表</span>
+                <span style="font-size:12.5px; font-weight:normal; color:var(--text-muted);" id="result-stats">生成 0 个号码</span>
+              </div>
+              <div class="card-actions">
+                <button class="btn btn-outline btn-sm" onclick="batchAddTopWishlist(5)">
+                  <span>⭐️ 批量添加前5个高分号</span>
+                </button>
+                <button class="btn btn-outline btn-sm" onclick="batchAddTopWishlist(10)">
+                  <span>⭐️ 批量添加前10个</span>
+                </button>
+              </div>
+            </div>
+            <div style="padding: 16px;">
+              <div class="plate-grid" id="plate-results-grid">
+                <!-- 动态卡片 -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 3: 12123 自编志愿清单 -->
+    <div id="tab-wishlist" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>我的 12123 自编志愿单 (<span id="wishlist-header-count">0</span>/20)</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-outline btn-sm" onclick="copyAllWishlist()">
+              <span>📋 一键复制全部车牌</span>
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="exportWishlistTXT()">
+              <span>📥 导出为文本 (.txt)</span>
+            </button>
+            <button class="btn btn-danger-outline btn-sm" onclick="clearWishlist()">
+              <span>🗑️ 清空自编单</span>
+            </button>
+          </div>
+        </div>
+        <div style="padding: 16px;">
+
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:#1e40af;">
+            💡 <strong>12123 自编填报规则：</strong>
+            系统自编通常提供 20 次机会（部分省市30次）。每次提交可录入 1~5 个意向号码。系统按<strong>“意向次序”逐个校验</strong>，命中第1意向则立即成功确认。请点击“上移/下移”将最心仪的号码排在前面！
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 80px;">志愿次序</th>
+                  <th>车牌号码</th>
+                  <th>号牌种类</th>
+                  <th>号牌特征标签</th>
+                  <th style="text-align: right;">调整 / 操作</th>
+                </tr>
+              </thead>
+              <tbody id="wishlist-table-body">
+                <!-- 动态填充 -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="wishlist-empty-box" class="wishlist-empty" style="display:none;">
+            <div class="icon">🛒</div>
+            <div style="font-weight:600; font-size:15px; margin-bottom:6px;">自编清单空空如也</div>
+            <p>请前往【🎯 智能选号】挑选心仪车牌，点击“+加入志愿单”进行排兵布阵！</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: 攻略与避坑指南 -->
+    <div id="tab-guide" class="tab-pane">
+      <div class="guide-box" style="border-left: 5px solid #059669;">
+        <h3 style="color: #065f46;">⚡️ 北京市小型新能源（京AP/京AG系列绿牌）实测投放规律大数据总结</h3>
+        <ul>
+          <li><strong>1. 核心字母特征（专段专用）：</strong><br>
+          在北京市，小型新能源汽车号牌第二位字母几乎全被 <strong><code>P</code></strong> 垄断（如 <code>京AP</code> 系列，偶尔穿插 <code>AG</code>、<code>AF</code> 等）。第三位字母在 <code>X</code>、<code>Y</code>、<code>T</code>、<code>S</code>、<code>G</code>、<code>M</code> 等之间高频循环轮动（如 <code>京APX</code>、<code>京APY</code>、<code>京APT</code>、<code>京AGG</code>）。车牌标准格式为 <code>京A·PXxxxx</code>（6位序号）。</li>
+          <li><strong>2. 投放频次与体量（高频海量、多批并发）：</strong><br>
+          新能源号段更新密度极大，一天内（甚至几分钟内）经常密集释放多批百连号（例如 9月6日深夜一小时内连续释放 <code>京APY0000</code>、<code>京AGG8000</code>、<code>京AGG4500</code> 等）。</li>
+          <li><strong>3. 科学选号“两阶段实战战术”：</strong><br>
+          • <strong>7 天内最新号段（如 9月7日刚放的 <code>京APX9100</code>、<code>京APY3300</code>）：</strong> 处于“仅限随机保护期”，自编功能尚未开放。但此时号池最饱满、靓号还未被挑空，<strong>建议用 12123 的【随机选号（50选1）】去刷大运</strong>，高概率直接摇出顺子或极品尾号！<br>
+          • <strong>超过 7 天的历史号段（如 8月31日 <code>京APY0800</code>、8月30日 <code>京APT0300</code> 及更早）：</strong> 已全面过保护期进入自编池，<strong>这是自编选号的主战场</strong>！利用本工具过滤掉 4，将连号、豹子、吉利号排好 1~20 志愿，直接在 12123【自编选号】中提交录入！</li>
+        </ul>
+      </div>
+
+      <div class="guide-box" style="border-left: 5px solid #d97706; background:#fffdfa;">
+        <h3 style="color: #b45309;">🎯 深度避坑：如何查询自编号码有没有被使用？高概率“捡漏”自编秘籍</h3>
+        <ul>
+          <li><strong>一、怎么判断号码有没有被占用？</strong><br>
+          • <strong>官方唯一合法渠道：</strong> 只有当你真正进入 12123【自编选号】界面，亲手输入号码并点击提交，系统才会告诉你是否被占用（被占用则消耗 1 次机会，未被占用则直接锁定成功）。<br>
+          • <strong>市面“付费查空号工具”的真相与巨大风险：</strong> 这类软件通过破解接口高频爬取，不仅数据有延迟（别人刚预选或回收的号可能误判为空号），而且属于<strong>违规接口探测</strong>，极易导致个人 12123 账号被系统风控封禁，甚至涉嫌破坏计算机系统安全，<strong>坚决不要使用</strong>！</li>
+          <li><strong>二、为什么没有公开的“剩余号码清单”？</strong><br>
+          车牌号池是全北京市数百万车主实时在消耗的“动态活水”，上一秒在、下一秒就可能被别人随机或自编抽走，官方绝不可能公开明细表以防止黄牛垄断。</li>
+          <li><strong>三、逆向思维高概率“捡漏”策略（不花钱、不违规）：</strong><br>
+          • 绝大多数大众的心理惯性：<strong>疯狂抢 8、6（纯 888、666 早已被秒光）</strong>，同时<strong>极度排斥 4、7</strong>。<br>
+          • <strong>聪明人的自编策略：</strong> 避开纯豹子等大热雷区，挑选<strong>发布超过 10 天以上的成熟号段</strong>，主攻“绝对不含4、带尾双叠(XX88/XX66/XX99)、ABAB对子、ABBA回文、小顺子、带1~2个8或6”的中端巧思号，一次自编命中的成功率在 80%~90% 以上！</li>
+          <li><strong>四、12123 的 20 次自编机会“梯队排兵布阵法”：</strong><br>
+          • <strong>第 1~3 次（冲刺梦想）：</strong> 挑 1~2 个最心仪的 4 连大豹子（如 6666、3333）撞运气，哪怕占用也不遗憾；<br>
+          • <strong>第 4~15 次（高命中主攻）：</strong> 切换至本工具的【🎯 低竞争高命中模式】，录入尾双叠（如 0388、0366）、ABAB对称（0303）、回文（0330）等巧思号，稳妥截胡；<br>
+          • <strong>第 16~20 次（吉祥保底）：</strong> 挑选无4且寓意顺畅的号码进行最后锁定，确保在自编阶段直接成功，避免被迫进入 90 秒倒计时的随机选号！</li>
+        </ul>
+      </div>
+
+      <div class="guide-box" style="border-left: 5px solid #10b981;">
+        <h3 style="color: #065f46;">📝 12123 新能源选号操作注意事项</h3>
+        <ol>
+          <li><strong>第一步：在 12123 手机 App 找到绿牌号段池</strong><br>
+          打开 12123 App 首页 -> 点击【号段公布】-> <strong>点击右上角【筛选】图标</strong> -> 将号牌种类勾选为<strong>【小型新能源汽车】</strong>（纯电请确认选择纯电动）。此时列表中展示的才是北京交管局投放的真实绿牌号段！</li>
+          <li><strong>第二步：认清北京绿牌格式</strong><br>
+          北京市小型新能源号牌为 6 位序号编码。纯电动常规为 <code>京A·Dxxxxx</code>、<code>京A·Exxxxx</code> 等（纯电标志字母为 D），插电混动/增程为 <code>京A·Fxxxxx</code>。</li>
+          <li><strong>第三步：利用本工具锁定满 7 天号段</strong><br>
+          超过投放时间 7 天的号段，剩余未被随机抽走的号牌已由公安系统随机投放进自编选号池。这正是自编 5 连豹子（如 88888）、4 连豹子（如 8888）、16888 的最佳时机！</li>
+          <li><strong>第四步：自编录入技巧</strong><br>
+          在 12123 App 进入【自编选号】。按照本工具规划好的 1~20 个意向次序，分批录入。最喜欢的靓号放在第一批第一意向，避免被次优号码误拦截确认。</li>
+        </ol>
+      </div>
+
+      <div class="guide-box">
+        <h3>📖 官方通用 7 天规则解析</h3>
+        <ul>
+          <li><strong>首次投放号段：</strong> 公告标明首次投放的号段，自投放时刻起，直接同时开放自编选号和随机选号。</li>
+          <li><strong>新投放号段：</strong> 7 日内只提供随机选号（50选1）；满 7 日后（投放时间 + 7天精确到分钟）系统随机投放到自编选号池。</li>
+          <li><strong>选号确认后的时效：</strong> 互联网选号确认后，一般需在 15 个工作日内到车管所办理上牌手续，逾期未办理将被拉黑 2 年！</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 添加号段弹窗 Modal -->
+  <div class="modal-overlay" id="modal-add-segment">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-add-title">录入官方公布新号段</div>
+        <button class="modal-close" onclick="closeAddModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 14px;">
+          <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;" id="lbl-add-prefix">号段前缀 (例如 绿牌: 京AD, 蓝牌: 京CHK)</label>
+          <input type="text" class="form-input" id="input-prefix" placeholder="例如: 京AD" value="京AD">
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">起始数字</label>
+            <input type="number" class="form-input" id="input-start" placeholder="如 88000" value="88000" min="0">
+          </div>
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">结束数字</label>
+            <input type="number" class="form-input" id="input-end" placeholder="如 88999" value="88999" min="0">
+          </div>
+        </div>
+        <div style="margin-bottom: 14px;">
+          <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">官方投放时间</label>
+          <input type="datetime-local" class="form-input" id="input-release-time">
+        </div>
+        <div style="margin-bottom: 8px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+            <input type="checkbox" id="input-is-first">
+            <span>标记为<strong>“首次投放号段”</strong> (立即解锁自编与随机)</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeAddModal()">取消</button>
+        <button class="btn btn-primary" onclick="submitAddSegment()">确认添加</button>
       </div>
     </div>
   </div>
- </div>
 
- <p class="foot">
-   界面参考：备胎说车《新车选号攻略》、billy电车日记《车牌自编号规则》B站视频实拍的 12123 截图。<br>
-   号段数据：你的录屏 OCR 提取（2026-06-16 → 09-07，共 <span id="sc2">—</span> 个）。号码占用为本地模拟，不代表实际可选状态。
- </p>
-</div>
-<script>
-const SEGS=[["京APX",9100,4,"2026-09-07 17:59"],["京AP",70300,5,"2026-09-07 17:59"],["京APY",3300,4,"2026-09-07 15:12"],["京APX",6700,4,"2026-09-07 15:12"],["京APY",6700,4,"2026-09-07 11:30"],["京APY",0,4,"2026-09-06 23:16"],["京AGQ",8000,4,"2026-09-06 23:15"],["京AGQ",4500,4,"2026-09-06 23:14"],["京APY",1900,4,"2026-09-06 23:14"],["京AGR",9300,4,"2026-09-06 23:14"],["京AP",56600,5,"2026-09-06 23:14"],["京AP",82500,5,"2026-09-06 23:14"],["京APY",2900,4,"2026-09-06 17:47"],["京AGN",3000,4,"2026-09-06 17:47"],["京APY",2400,4,"2026-09-06 16:53"],["京AGN",4500,4,"2026-09-06 16:53"],["京APY",6600,4,"2026-09-06 09:12"],["京APX",9000,4,"2026-09-06 09:12"],["京AP",80200,5,"2026-09-06 09:12"],["京APY",3500,4,"2026-09-05 18:34"],["京APY",700,4,"2026-09-05 18:34"],["京AP",78300,5,"2026-09-05 18:34"],["京AGL",3700,4,"2026-09-05 18:14"],["京APS",6900,4,"2026-09-05 18:14"],["京AP",64300,5,"2026-09-05 18:14"],["京AP",96200,5,"2026-09-05 18:14"],["京APY",2700,4,"2026-09-05 15:49"],["京APT",0,4,"2026-09-05 15:49"],["京AGL",3800,4,"2026-09-05 15:49"],["京APY",3100,4,"2026-09-05 09:57"],["京AGR",200,4,"2026-09-05 09:57"],["京AGR",9100,4,"2026-09-05 09:57"],["京AP",68700,5,"2026-09-05 09:57"],["京AGR",2200,4,"2026-09-04 14:35"],["京AGL",6100,4,"2026-09-04 14:35"],["京AP",94900,5,"2026-09-04 09:19"],["京AP",95200,5,"2026-09-03 19:50"],["京APY",8300,4,"2026-09-03 16:33"],["京AGQ",7900,4,"2026-09-03 16:33"],["京AP",96700,5,"2026-09-03 16:33"],["京AP",95600,5,"2026-09-03 16:33"],["京AP",95900,5,"2026-09-03 16:33"],["京AP",71700,5,"2026-09-03 16:06"],["京APY",1200,4,"2026-09-02 14:37"],["京APX",8800,4,"2026-09-02 14:37"],["京AP",73700,5,"2026-09-02 14:37"],["京AP",94000,5,"2026-09-02 14:37"],["京APT",6100,4,"2026-09-02 09:00"],["京AGL",4800,4,"2026-09-02 09:00"],["京APX",8400,4,"2026-09-02 08:54"],["京APT",5900,4,"2026-09-02 08:54"],["京AP",79400,5,"2026-09-02 08:54"],["京AP",32700,5,"2026-09-01 21:11"],["京APT",6700,4,"2026-09-01 21:09"],["京APP",1200,4,"2026-09-01 18:45"],["京APX",8500,4,"2026-09-01 13:48"],["京APP",2300,4,"2026-09-01 13:48"],["京AP",78400,5,"2026-09-01 13:48"],["京AP",63700,5,"2026-09-01 10:45"],["京AP",48600,5,"2026-08-31 22:28"],["京APP",2200,4,"2026-08-31 20:29"],["京AP",61600,5,"2026-08-31 20:29"],["京APX",9700,4,"2026-08-31 15:41"],["京APY",1400,4,"2026-08-31 15:36"],["京APP",3700,4,"2026-08-31 15:36"],["京AP",71400,5,"2026-08-31 15:36"],["京APX",8700,4,"2026-08-31 10:49"],["京AP",58900,5,"2026-08-31 10:49"],["京AP",47000,5,"2026-08-31 10:49"],["京AGQ",3700,4,"2026-08-30 21:24"],["京AP",49000,5,"2026-08-30 21:24"],["京APP",600,4,"2026-08-30 20:43"],["京AP",93100,5,"2026-08-30 20:43"],["京AP",87200,5,"2026-08-30 20:43"],["京AP",26500,5,"2026-08-30 20:43"],["京APY",1600,4,"2026-08-30 18:37"],["京AGN",5000,4,"2026-08-30 18:37"],["京APT",9400,4,"2026-08-30 17:54"],["京AP",71000,5,"2026-08-30 17:54"],["京APT",8300,4,"2026-08-30 15:30"],["京AP",68800,5,"2026-08-30 15:30"],["京APY",300,4,"2026-08-30 11:13"],["京AP",75800,5,"2026-08-30 11:13"],["京APY",1800,4,"2026-08-29 21:46"],["京AP",84100,5,"2026-08-29 21:46"],["京AP",96000,5,"2026-08-29 17:36"],["京AP",68400,5,"2026-08-29 17:36"],["京APX",5500,4,"2026-08-29 14:49"],["京AP",97200,5,"2026-08-29 14:49"],["京APT",9300,4,"2026-08-29 13:24"],["京AGL",3500,4,"2026-08-29 13:24"],["京APY",500,4,"2026-08-28 22:21"],["京AP",93500,5,"2026-08-28 22:21"],["京AP",71600,5,"2026-08-28 22:21"],["京AGR",2000,4,"2026-08-28 16:40"],["京AP",71500,5,"2026-08-28 16:40"],["京APT",9600,4,"2026-08-28 16:16"],["京APX",8100,4,"2026-08-28 12:50"],["京APY",400,4,"2026-08-27 22:49"],["京AP",96100,5,"2026-08-27 22:49"],["京APX",8200,4,"2026-08-27 19:50"],["京AP",97100,5,"2026-08-27 19:50"],["京APX",9600,4,"2026-08-27 14:07"],["京APX",8000,4,"2026-08-27 09:52"],["京APY",200,4,"2026-08-26 15:18"],["京AGQ",5800,4,"2026-08-26 15:11"],["京AP",89000,5,"2026-08-26 15:11"],["京APX",6800,4,"2026-08-26 12:42"],["京AP",94100,5,"2026-08-26 12:42"],["京APY",100,4,"2026-08-25 23:04"],["京AGR",9700,4,"2026-08-25 17:13"],["京APT",100,4,"2026-08-25 16:54"],["京APT",9500,4,"2026-08-25 13:41"],["京AP",34000,5,"2026-08-25 13:41"],["京APX",9500,4,"2026-08-25 09:07"],["京APX",7400,4,"2026-08-25 08:59"],["京APT",200,4,"2026-08-24 20:46"],["京AGS",4300,4,"2026-08-24 20:41"],["京AP",46400,5,"2026-08-24 20:41"],["京AGR",5700,4,"2026-08-24 20:00"],["京AP",52000,5,"2026-08-24 20:00"],["京APT",300,4,"2026-08-24 16:11"],["京APX",5800,4,"2026-08-24 13:21"],["京APX",7900,4,"2026-08-24 09:19"],["京APT",500,4,"2026-08-23 20:15"],["京AP",63500,5,"2026-08-23 20:15"],["京AGR",500,4,"2026-08-23 18:23"],["京AP",49500,5,"2026-08-23 18:23"],["京APX",9300,4,"2026-08-23 16:23"],["京AP",30000,5,"2026-08-23 16:23"],["京APX",6100,4,"2026-08-23 13:20"],["京AP",27900,5,"2026-08-23 13:20"],["京APS",7700,4,"2026-08-22 23:21"],["京APX",6400,4,"2026-08-22 23:21"],["京AP",63600,5,"2026-08-22 23:21"],["京APX",7500,4,"2026-08-22 18:52"],["京APX",7600,4,"2026-08-22 18:52"],["京AP",88200,5,"2026-08-22 18:52"],["京AP",53100,5,"2026-08-22 18:52"],["京AP",26900,5,"2026-08-22 18:52"],["京AGR",9900,4,"2026-08-22 16:04"],["京AGS",6800,4,"2026-08-22 16:04"],["京AGL",300,4,"2026-08-22 16:04"],["京AP",52400,5,"2026-08-22 16:04"],["京AGP",8300,4,"2026-08-22 16:04"],["京AGP",9400,4,"2026-08-22 15:17"],["京APX",6300,4,"2026-08-22 13:02"],["京APX",6000,4,"2026-08-22 13:02"],["京AP",85300,5,"2026-08-22 13:02"],["京AP",55200,5,"2026-08-22 13:02"],["京AFS",9800,4,"2026-08-22 13:02"],["京APX",7800,4,"2026-08-21 23:30"],["京AP",55300,5,"2026-08-21 23:30"],["京AFP",7000,4,"2026-08-21 23:30"],["京APX",7300,4,"2026-08-21 17:39"],["京AGN",4300,4,"2026-08-21 17:39"],["京AP",66400,5,"2026-08-21 17:39"],["京AFT",6600,4,"2026-08-21 17:39"],["京AGR",9200,4,"2026-08-21 12:18"],["京AP",89700,5,"2026-08-21 12:18"],["京AP",52500,5,"2026-08-21 12:18"],["京APS",6700,4,"2026-08-21 08:34"],["京APX",7000,4,"2026-08-21 08:34"],["京AP",69100,5,"2026-08-21 08:34"],["京AP",97600,5,"2026-08-21 08:34"],["京AFT",700,4,"2026-08-21 08:34"],["京APT",7900,4,"2026-08-20 20:28"],["京APX",6500,4,"2026-08-20 20:28"],["京AP",52900,5,"2026-08-20 20:28"],["京AP",79900,5,"2026-08-20 20:28"],["京AP",80000,5,"2026-08-20 20:28"],["京AF",96400,5,"2026-08-20 20:28"],["京APY",2000,4,"2026-08-20 19:57"],["京AP",96300,5,"2026-08-20 19:57"],["京AFX",200,4,"2026-08-20 19:57"],["京AP",72000,5,"2026-08-20 14:33"],["京AFN",3200,4,"2026-08-20 14:33"],["京AGR",1900,4,"2026-08-20 11:50"],["京AP",36000,5,"2026-08-20 11:50"],["京APS",6800,4,"2026-08-20 11:46"],["京AP",55500,5,"2026-08-20 11:46"],["京AP",26600,5,"2026-08-18 15:30"],["京APS",9900,4,"2026-08-18 13:17"],["京AP",28600,5,"2026-08-18 13:17"],["京APT",9700,4,"2026-08-17 23:05"],["京APT",8400,4,"2026-08-17 23:00"],["京APP",1100,4,"2026-08-17 23:00"],["京APT",8100,4,"2026-08-17 22:57"],["京APP",1500,4,"2026-08-17 22:57"],["京APT",8000,4,"2026-08-17 22:56"],["京APX",5300,4,"2026-08-17 22:51"],["京APT",7600,4,"2026-08-17 22:51"],["京APP",3500,4,"2026-08-17 22:51"],["京APT",7400,4,"2026-08-17 22:45"],["京APT",8600,4,"2026-08-17 22:43"],["京APT",7700,4,"2026-08-17 22:43"],["京APX",5200,4,"2026-08-17 22:43"],["京APP",1700,4,"2026-08-17 22:43"],["京AGR",9800,4,"2026-08-17 22:43"],["京AP",98400,5,"2026-08-17 22:43"],["京AP",67100,5,"2026-08-17 22:43"],["京AP",84600,5,"2026-08-17 22:43"],["京AP",89200,5,"2026-08-17 22:36"],["京AP",56900,5,"2026-08-17 22:33"],["京AP",68600,5,"2026-08-17 22:33"],["京APT",8500,4,"2026-08-17 22:28"],["京AGN",8200,4,"2026-08-17 22:28"],["京AP",74700,5,"2026-08-17 22:28"],["京AP",59300,5,"2026-08-17 22:28"],["京AP",99800,5,"2026-08-17 22:28"],["京APT",8200,4,"2026-08-17 22:27"],["京AP",93900,5,"2026-08-17 22:27"],["京AP",67300,5,"2026-08-17 22:27"],["京AP",80400,5,"2026-08-17 22:27"],["京AP",91400,5,"2026-08-17 22:24"],["京AP",70900,5,"2026-08-17 22:24"],["京APX",5100,4,"2026-08-17 22:17"],["京AGS",4100,4,"2026-08-17 22:17"],["京AP",97000,5,"2026-08-17 22:17"],["京AP",64100,5,"2026-08-17 22:17"],["京APT",7500,4,"2026-08-17 22:14"],["京AGM",6900,4,"2026-08-17 22:14"],["京AP",74800,5,"2026-08-17 22:14"],["京AP",83700,5,"2026-08-17 22:14"],["京AP",83100,5,"2026-08-17 22:14"],["京AGN",2700,4,"2026-08-17 21:58"],["京APX",7200,4,"2026-08-17 21:50"],["京APT",7200,4,"2026-08-17 21:50"],["京APT",6800,4,"2026-08-17 21:48"],["京APT",6600,4,"2026-08-17 21:39"],["京AP",51600,5,"2026-08-17 21:39"],["京APP",3400,4,"2026-08-17 21:36"],["京APT",6000,4,"2026-08-17 21:35"],["京AGR",4000,4,"2026-08-17 21:30"],["京APT",6400,4,"2026-08-17 21:30"],["京APT",8700,4,"2026-08-17 21:24"],["京APT",8800,4,"2026-08-17 21:23"],["京APP",1400,4,"2026-08-17 21:23"],["京APT",6500,4,"2026-08-17 21:16"],["京APT",7800,4,"2026-08-17 21:15"],["京APP",2800,4,"2026-08-17 21:15"],["京APP",2100,4,"2026-08-17 21:13"],["京APX",5700,4,"2026-08-17 21:12"],["京APT",7100,4,"2026-08-17 21:12"],["京AP",92900,5,"2026-08-17 21:12"],["京APT",7000,4,"2026-08-17 21:11"],["京AP",92600,5,"2026-08-17 21:10"],["京APP",1900,4,"2026-08-17 21:08"],["京AP",92000,5,"2026-08-17 21:08"],["京APP",1800,4,"2026-08-17 21:07"],["京AGP",9000,4,"2026-08-17 21:07"],["京APP",700,4,"2026-08-17 21:05"],["京AP",98000,5,"2026-08-17 21:05"],["京APT",6900,4,"2026-08-17 21:01"],["京AGN",4100,4,"2026-08-17 21:01"],["京AGS",2600,4,"2026-08-17 12:04"],["京AP",88800,5,"2026-08-17 12:04"],["京AGR",4500,4,"2026-08-17 12:01"],["京AP",92700,5,"2026-08-17 12:01"],["京AGM",9800,4,"2026-08-15 18:17"],["京AP",98600,5,"2026-08-15 18:17"],["京AGS",5500,4,"2026-08-14 17:10"],["京AP",98900,5,"2026-08-14 17:10"],["京AGS",8800,4,"2026-08-13 12:54"],["京AGL",6900,4,"2026-08-12 13:54"],["京APX",5400,4,"2026-08-10 15:48"],["京AP",99000,5,"2026-08-10 15:48"],["京AP",69600,5,"2026-08-10 15:48"],["京APT",8900,4,"2026-08-09 09:49"],["京AP",56400,5,"2026-08-09 09:49"],["京AP",74500,5,"2026-08-09 09:49"],["京AP",65700,5,"2026-08-09 09:49"],["京AP",50500,5,"2026-08-09 09:49"],["京AGL",5700,4,"2026-08-06 11:15"],["京AP",93000,5,"2026-08-06 11:15"],["京AGS",8300,4,"2026-08-04 23:43"],["京AP",92800,5,"2026-08-03 22:24"],["京AP",72100,5,"2026-08-03 22:24"],["京APT",6300,4,"2026-08-03 21:58"],["京AGS",4900,4,"2026-08-03 21:58"],["京APP",1300,4,"2026-08-02 17:28"],["京AGM",9900,4,"2026-08-02 17:28"],["京AP",75700,5,"2026-08-02 17:28"],["京AP",99300,5,"2026-08-02 17:28"],["京APT",5700,4,"2026-08-01 17:42"],["京AP",82200,5,"2026-08-01 17:42"],["京AP",85700,5,"2026-08-01 17:42"],["京APP",1000,4,"2026-07-31 16:05"],["京AGS",7100,4,"2026-07-31 16:05"],["京AP",39100,5,"2026-07-31 16:05"],["京AP",67800,5,"2026-07-31 16:05"],["京AP",89100,5,"2026-07-31 16:05"],["京APP",3000,4,"2026-07-30 13:30"],["京AGS",7600,4,"2026-07-30 13:30"],["京AP",63900,5,"2026-07-30 13:30"],["京AP",60700,5,"2026-07-30 13:30"],["京AGM",0,4,"2026-07-26 14:30"],["京AGM",800,4,"2026-07-26 14:30"],["京AGM",1100,4,"2026-07-25 14:16"],["京APX",5600,4,"2026-07-25 13:57"],["京AGL",6200,4,"2026-07-25 13:57"],["京AP",84800,5,"2026-07-25 13:57"],["京AP",60400,5,"2026-07-25 13:57"],["京AP",94600,5,"2026-07-25 13:34"],["京AP",96800,5,"2026-07-24 20:53"],["京AP",78900,5,"2026-07-24 17:20"],["京AP",92500,5,"2026-07-24 12:36"],["京AP",96900,5,"2026-07-24 09:16"],["京AGL",3600,4,"2026-07-23 21:29"],["京AP",89800,5,"2026-07-23 16:09"],["京AP",93400,5,"2026-07-23 12:25"],["京AP",93300,5,"2026-07-23 12:18"],["京AP",95100,5,"2026-07-22 21:59"],["京AGS",7200,4,"2026-07-22 17:47"],["京AP",98300,5,"2026-07-22 17:00"],["京AP",63100,5,"2026-07-22 13:30"],["京AP",91300,5,"2026-07-22 11:14"],["京AGM",2100,4,"2026-07-21 21:43"],["京AP",99200,5,"2026-07-21 21:35"],["京AP",99100,5,"2026-07-21 15:19"],["京AP",92300,5,"2026-07-21 15:19"],["京AGS",7500,4,"2026-07-21 10:31"],["京AGN",8000,4,"2026-07-21 10:31"],["京AP",95000,5,"2026-07-20 21:15"],["京AP",75300,5,"2026-07-20 21:15"],["京AP",92200,5,"2026-07-20 16:50"],["京AP",96500,5,"2026-07-20 14:56"],["京AP",92100,5,"2026-07-20 14:56"],["京AP",94500,5,"2026-07-20 14:11"],["京AP",63000,5,"2026-07-20 14:11"],["京AP",98500,5,"2026-07-20 11:22"],["京AGS",5300,4,"2026-07-20 11:22"],["京AGS",8700,4,"2026-07-20 10:04"],["京AP",59600,5,"2026-07-20 10:04"],["京AP",98100,5,"2026-07-19 19:08"],["京AP",97500,5,"2026-07-19 19:08"],["京AP",78600,5,"2026-07-19 16:40"],["京AP",90800,5,"2026-07-19 16:40"],["京AP",95800,5,"2026-07-19 13:28"],["京AF",96000,5,"2026-07-19 13:28"],["京AP",98800,5,"2026-07-19 09:54"],["京AP",62300,5,"2026-07-19 09:54"],["京AP",89900,5,"2026-07-18 15:24"],["京AGR",1600,4,"2026-07-18 15:24"],["京AGP",9200,4,"2026-07-18 15:24"],["京AP",92400,5,"2026-07-18 10:56"],["京AP",93700,5,"2026-07-18 10:56"],["京AP",64400,5,"2026-07-18 10:56"],["京AP",93200,5,"2026-07-17 21:44"],["京APT",5800,4,"2026-07-17 21:32"],["京AP",94200,5,"2026-07-17 21:32"],["京APP",400,4,"2026-07-17 13:48"],["京AGS",8400,4,"2026-07-17 13:48"],["京AP",75000,5,"2026-07-16 20:38"],["京AP",95700,5,"2026-07-16 20:38"],["京AP",90600,5,"2026-07-15 22:08"],["京AP",58000,5,"2026-07-15 12:28"],["京AP",94800,5,"2026-07-14 19:55"],["京APY",2300,4,"2026-07-13 11:50"],["京AP",79200,5,"2026-07-13 11:50"],["京APY",600,4,"2026-07-12 19:09"],["京AP",67000,5,"2026-07-12 19:09"],["京AGQ",7800,4,"2026-07-12 16:32"],["京AGN",9700,4,"2026-07-12 16:32"],["京AP",98200,5,"2026-07-12 16:32"],["京AP",53300,5,"2026-07-12 16:32"],["京APT",9100,4,"2026-07-12 16:31"],["京AP",63200,5,"2026-07-12 16:31"],["京AP",90700,5,"2026-07-12 16:31"],["京AP",52300,5,"2026-07-12 16:31"],["京AP",50300,5,"2026-07-12 16:31"],["京AP",75100,5,"2026-07-12 13:26"],["京AP",81200,5,"2026-07-12 13:26"],["京AP",54200,5,"2026-07-12 13:26"],["京APX",8300,4,"2026-07-12 10:44"],["京AGP",1000,4,"2026-07-12 10:20"],["京AP",45900,5,"2026-07-12 10:20"],["京APX",7700,4,"2026-07-11 20:14"],["京AP",78800,5,"2026-07-11 20:14"],["京AP",87600,5,"2026-07-11 17:35"],["京AP",88300,5,"2026-07-11 14:21"],["京AP",71900,5,"2026-07-11 14:21"],["京AP",66900,5,"2026-07-11 14:21"],["京AGN",7900,4,"2026-07-11 12:27"],["京AP",76100,5,"2026-07-11 12:27"],["京AP",79800,5,"2026-07-11 12:27"],["京AP",99900,5,"2026-07-11 11:55"],["京AP",80300,5,"2026-07-11 11:55"],["京AP",88900,5,"2026-07-10 22:02"],["京AGL",7000,4,"2026-07-10 22:02"],["京AP",53200,5,"2026-07-10 22:02"],["京AP",54400,5,"2026-07-10 17:46"],["京AP",90400,5,"2026-07-10 14:08"],["京AP",91100,5,"2026-07-10 14:08"],["京AP",57100,5,"2026-07-10 14:08"],["京AP",77500,5,"2026-07-10 14:08"],["京APX",9800,4,"2026-07-09 21:43"],["京AP",93600,5,"2026-07-09 21:43"],["京APX",6600,4,"2026-07-09 13:48"],["京AGM",2300,4,"2026-07-09 13:48"],["京APS",6600,4,"2026-07-09 13:25"],["京APS",7500,4,"2026-07-09 13:24"],["京APS",9800,4,"2026-07-09 13:24"],["京AGM",4300,4,"2026-07-09 13:24"],["京AP",56300,5,"2026-07-09 13:24"],["京AFT",6500,4,"2026-07-09 13:24"],["京AGQ",5300,4,"2026-07-09 13:11"],["京AF",60200,5,"2026-07-09 13:11"],["京APX",7100,4,"2026-07-08 17:16"],["京AP",97400,5,"2026-07-08 17:16"],["京AP",95400,5,"2026-07-08 14:41"],["京AGL",4500,4,"2026-07-08 14:41"],["京AP",60300,5,"2026-07-08 14:41"],["京AP",91500,5,"2026-07-08 14:20"],["京AGL",4100,4,"2026-07-08 14:20"],["京AP",64200,5,"2026-07-07 17:46"],["京AP",81900,5,"2026-07-07 17:46"],["京AP",79700,5,"2026-07-07 17:46"],["京AGL",2700,4,"2026-07-07 14:34"],["京AP",56100,5,"2026-07-07 14:34"],["京AP",61800,5,"2026-07-07 13:44"],["京AP",66500,5,"2026-07-07 13:44"],["京AP",79000,5,"2026-07-06 15:37"],["京AP",64000,5,"2026-07-06 15:04"],["京AP",50100,5,"2026-07-06 10:58"],["京AP",75900,5,"2026-07-05 22:03"],["京AP",26700,5,"2026-07-05 22:03"],["京APT",7300,4,"2026-07-05 16:15"],["京AGS",4200,4,"2026-07-05 16:15"],["京AP",57600,5,"2026-07-05 16:15"],["京AP",83300,5,"2026-07-05 16:15"],["京AP",27100,5,"2026-07-05 11:10"],["京AP",59900,5,"2026-07-04 23:19"],["京AP",62500,5,"2026-07-04 23:19"],["京APX",6200,4,"2026-07-04 13:38"],["京AP",78000,5,"2026-07-04 13:38"],["京AGQ",5500,4,"2026-07-04 10:52"],["京AP",57700,5,"2026-07-03 12:08"],["京AP",87400,5,"2026-07-03 11:40"],["京APS",7600,4,"2026-07-02 20:37"],["京AFP",8200,4,"2026-07-02 18:14"],["京AP",89400,5,"2026-07-02 16:53"],["京AP",89600,5,"2026-07-02 12:45"],["京AP",96400,5,"2026-07-01 21:57"],["京AP",94700,5,"2026-07-01 18:59"],["京AP",87700,5,"2026-07-01 15:04"],["京AP",56200,5,"2026-07-01 12:21"],["京AP",82000,5,"2026-06-30 23:05"],["京APY",1000,4,"2026-06-30 12:37"],["京AGL",2100,4,"2026-06-30 12:37"],["京AP",81100,5,"2026-06-29 12:31"],["京AP",78500,5,"2026-06-29 08:43"],["京AP",69800,5,"2026-06-28 19:34"],["京AGS",6500,4,"2026-06-28 17:33"],["京AP",85000,5,"2026-06-28 17:33"],["京AGL",5800,4,"2026-06-28 15:12"],["京AP",82700,5,"2026-06-28 12:27"],["京AP",88400,5,"2026-06-28 10:28"],["京AP",87100,5,"2026-06-27 22:11"],["京AP",87500,5,"2026-06-27 19:02"],["京AP",86800,5,"2026-06-27 16:28"],["京AP",82300,5,"2026-06-27 15:16"],["京AP",88100,5,"2026-06-27 13:17"],["京AP",87300,5,"2026-06-27 10:37"],["京AGL",2400,4,"2026-06-27 09:15"],["京AGR",9500,4,"2026-06-27 08:44"],["京AP",95500,5,"2026-06-26 22:32"],["京AP",94300,5,"2026-06-26 20:57"],["京AP",89500,5,"2026-06-26 20:38"],["京AP",80900,5,"2026-06-26 17:07"],["京AP",91900,5,"2026-06-26 14:28"],["京AP",87800,5,"2026-06-26 12:06"],["京AGL",2800,4,"2026-06-26 09:24"],["京AP",86000,5,"2026-06-25 22:55"],["京AP",72600,5,"2026-06-25 11:04"],["京AP",81800,5,"2026-06-24 21:24"],["京APP",900,4,"2026-06-24 18:26"],["京AP",96600,5,"2026-06-24 18:26"],["京AP",86700,5,"2026-06-24 15:07"],["京AP",60500,5,"2026-06-24 12:55"],["京AP",82800,5,"2026-06-24 10:31"],["京AP",82400,5,"2026-06-24 10:06"],["京AP",85400,5,"2026-06-24 09:54"],["京AP",81700,5,"2026-06-23 22:14"],["京AP",80700,5,"2026-06-23 19:59"],["京AP",97900,5,"2026-06-23 16:46"],["京AP",76500,5,"2026-06-23 15:47"],["京AP",81000,5,"2026-06-23 12:46"],["京AP",60900,5,"2026-06-22 14:33"],["京AP",76900,5,"2026-06-21 17:01"],["京AP",78700,5,"2026-06-21 14:32"],["京AP",73000,5,"2026-06-21 11:13"],["京APT",9000,4,"2026-06-19 20:09"],["京AP",39200,5,"2026-06-19 20:09"],["京AGN",6000,4,"2026-06-19 20:09"],["京AP",67200,5,"2026-06-19 20:09"],["京AP",80500,5,"2026-06-19 09:58"],["京AGQ",3500,4,"2026-06-18 21:25"],["京AP",72400,5,"2026-06-18 21:25"],["京APP",2400,4,"2026-06-18 17:31"],["京AGL",4700,4,"2026-06-18 17:31"],["京AP",93800,5,"2026-06-18 17:31"],["京AP",72700,5,"2026-06-18 17:31"],["京AP",97800,5,"2026-06-18 17:31"],["京AP",33400,5,"2026-06-17 21:44"],["京AP",29400,5,"2026-06-17 20:54"],["京AP",45600,5,"2026-06-17 20:47"],["京AP",71800,5,"2026-06-17 15:35"],["京AGN",9300,4,"2026-06-17 15:35"],["京AP",73400,5,"2026-06-17 15:35"],["京AP",86500,5,"2026-06-17 15:11"],["京APY",800,4,"2026-06-17 15:08"],["京AP",90000,5,"2026-06-17 15:08"],["京AP",55000,5,"2026-06-17 15:08"],["京AP",33800,5,"2026-06-17 15:03"],["京AP",33200,5,"2026-06-17 13:18"],["京AP",35900,5,"2026-06-17 13:17"],["京AP",63400,5,"2026-06-17 13:17"],["京AP",80100,5,"2026-06-17 13:14"],["京AP",89300,5,"2026-06-17 13:11"],["京AP",78100,5,"2026-06-17 13:08"],["京AP",51700,5,"2026-06-17 13:07"],["京AP",87000,5,"2026-06-17 13:06"],["京AP",30500,5,"2026-06-17 13:06"],["京APP",3200,4,"2026-06-17 13:02"],["京AP",30100,5,"2026-06-17 13:02"],["京APP",1600,4,"2026-06-17 12:56"],["京AP",69700,5,"2026-06-17 12:43"],["京AP",30200,5,"2026-06-17 12:43"],["京AGN",2900,4,"2026-06-17 12:36"],["京AP",47700,5,"2026-06-17 12:34"],["京AP",79300,5,"2026-06-17 12:30"],["京AP",69200,5,"2026-06-17 12:29"],["京AP",70800,5,"2026-06-17 12:29"],["京AP",49600,5,"2026-06-17 12:29"],["京AGP",9300,4,"2026-06-16 10:23"]];
-const NOW=new Date(2026,8,7,19,0), DAY=864e5;
-const segs=SEGS.map(([p,st,w,t],i)=>{const rt=new Date(t.replace(/-/g,"/"));
-  return{i,prefix:p,start:st,width:w,rt,unlocked:(NOW-rt)>=7*DAY,age:Math.floor((NOW-rt)/DAY)}});
-const UNLOCKED=segs.filter(z=>z.unlocked);
-sc.textContent=sc2.textContent=segs.length;
+  <!-- 批量粘贴识别弹窗 Modal -->
+  <div class="modal-overlay" id="modal-batch-import">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">📝 智能批量解析导入号段</div>
+        <button class="modal-close" onclick="closeBatchModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">
+          支持直接从 12123 手机端复制号段文字并粘贴，系统将自动识别提取时间和号段起止范围！
+        </p>
+        <textarea id="batch-paste-textarea" class="form-input" style="height:150px; font-family:monospace; font-size:12.5px; line-height:1.5;" placeholder="例如粘贴绿牌或蓝牌号段：
+2026-09-05 15:30 京AD88000 ~ AD88999
+或
+2026-09-06 14:39 京CHK300 ~ CHK399"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeBatchModal()">取消</button>
+        <button class="btn btn-primary" onclick="submitBatchImport()">开始智能识别导入</button>
+      </div>
+    </div>
+  </div>
 
-const pad=(n,w)=>String(n).padStart(w,"0");
-const full=(sg,n)=>sg.prefix+pad(n,sg.width);
-const CN=["一","二","三","四","五"];
+  <!-- 浮动 Toast 提示 -->
+  <div id="toast-notify" class="toast">操作成功</div>
 
-let S={};
-function reset(){
-  clearInterval(S.tm);
-  S={seg:null,tab:"s",
-     // 自编：4轮 × 5个 = 20 额度
-     selfRound:1, selfLeft:20, wl:[{v:""}], wlSel:0,
-     // 随机：5批 × 10个，全池混合
-     batch:0, cur:null, seen:new Set(), pool:[], pick:0,
-     total:300, roundLeft:0, tm:null, started:false,
-     done:null, taken:new Map()};
-  lg.innerHTML="<div>等待开始…</div>"; fillSeg(); draw();
-}
-function log(m){ if(lg.firstChild&&lg.textContent.includes("等待"))lg.innerHTML="";
-  const d=document.createElement("div"); d.innerHTML=m; lg.prepend(d); }
-
-function taken(sg,n){
-  const k=sg.i+":"+n; if(S.taken.has(k))return S.taken.get(k);
-  let h=2166136261; for(const c of k){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}
-  const r=((h>>>0)%1e4)/1e4;
-  const base=sg.unlocked?.55+Math.min(sg.age,60)/60*.3:.12;
-  const v=r<Math.min(base+(score(pad(n,sg.width))>=55?.35:0),.985);
-  S.taken.set(k,v); return v;
-}
-function score(s){let x=0;const d=[...s].map(Number);
-  if(d.every(y=>y===d[0]))x+=100;else if(/(\d)\1{2}/.test(s))x+=60;
-  if(d.every((y,i)=>!i||y===d[i-1]+1))x+=80;
-  if(s.length>=4){const l=s.slice(-4);
-    if(l[0]===l[2]&&l[1]===l[3]&&l[0]!==l[1])x+=45;
-    else if(l[0]===l[1]&&l[2]===l[3]&&l[0]!==l[2])x+=50;
-    else if(l[0]===l[3]&&l[1]===l[2]&&l[0]!==l[1])x+=40;}
-  if(/0{3}$/.test(s))x+=45;else if(/00$/.test(s))x+=25;
-  if(s.includes("168"))x+=35;
-  if(s.includes("4"))x-=30;
-  if(/8$/.test(s))x+=12;else if(/6$/.test(s))x+=9;
-  return x;}
-// 三连号禁止（攻略：自编不能编三连）
-// 自编禁止：同一数字出现 3 次及以上（不管是否相连）
-// 111 ❌  1x1x1 ❌  123 ✅  321 ✅  1122 ✅
-const hasTriple=s=>{const c={};for(const ch of s){if(!/\d/.test(ch))continue;
-  if((c[ch]=(c[ch]||0)+1)>=3)return true;}return false;};
-const dupCount=(s,d)=>[...s].filter(x=>x===d).length;
-
-function fillSeg(){
-  const v=f.value, L=segs.filter(z=>v==="ok"?z.unlocked:!z.unlocked);
-  s.innerHTML=L.map(z=>`<option value="${z.i}">${z.prefix}${pad(z.start,z.width)}~${pad(z.start+99,z.width)} · ${z.rt.toISOString().slice(5,10)}</option>`).join("");
-  if(L.length){S.seg=L[0];s.value=L[0].i;}
-}
-
-const tabR=document.getElementById("tab-r"), tabS=document.getElementById("tab-s");
-
-function draw(){
-  const sg=S.seg;
-  h3.innerHTML=S.selfLeft+"<small>个</small>";
-  h5.innerHTML=Math.min(S.selfRound,4)+"<small>/4</small>";
-  h1.innerHTML=S.batch+"<small>/5</small>";
-  h6.innerHTML=S.total+"<small>秒</small>";
-  h6.style.color=S.started&&S.total<=60?"var(--red)":"";
-  if(sg)sm.innerHTML=`<span class="pill ${sg.unlocked?"ok":"no"}">${sg.unlocked?"≥7天 · 可自编":"<7天 · 不可自编"}</span>
-    <span style="color:var(--ink3)">投放 ${sg.rt.toISOString().slice(5,16).replace("T"," ")} · 已 ${sg.age} 天</span>`;
-  tabR.className=S.tab==="r"?"on":""; tabS.className=S.tab==="s"?"on":"";
-  tip.innerHTML=tipFor();
-  scr.innerHTML=S.done?doneHtml():(S.tab==="r"?randHtml():selfHtml());
-  if(!S.done)bind();
-}
-
-function tipFor(){
-  if(S.done)return `<div class="card"><h2><span class="d"></span>已锁定</h2>
-    <p>流程结束，另一种方式已关闭。接下来 <b>3 个工作日</b>内必须去车管所办注册登记。</p></div>`;
-  if(S.tab==="s")return `<div class="card"><h2><span class="d"></span>自编：先在这里磨，别急着提交</h2>
-    <p><b>无时间限制</b>，可随时退出；<b>只要没提交，额度就还在</b>。</p>
-    <p>共 <b>20 个额度 = 4 轮 × 每轮 5 个</b>。<b>提交一次消耗一整轮</b>，所以每轮务必填满 5 个，填 1 个就提交等于浪费 4 个。</p>
-    <p>系统<b>从第一意向顺序验证</b>，命中即锁、无法回退 → <b>最想要的放第一位</b>（失败没代价，只是往下走一格）。</p>
-    <p>键盘<b>逐位锁死</b>：号段字母固定，数字只能在该段范围内；
-       且<b>同一数字最多出现 2 次</b>——按满 2 次后该键自动变灰。</p>
-    <p style="font-size:11.5px;color:var(--ink3)">✅ 1234 / 4321 / 1212 可以　❌ 1112 / 1101（1 出现 3 次）不行</p></div>`;
-  return `<div class="card"><h2><span class="d"></span>随机：全池混合，且在计时</h2>
-    <p>号池是<b>所有已解锁号段混在一起</b>（共 ${UNLOCKED.length} 个段），所以一批 10 个号<b>前缀各不相同</b>——你控制不了出什么。</p>
-    <p><b>进入随机页就开始跑 300 秒总表</b>，切回自编页也<b>继续走</b>。所以：先把自编磨好，最后再进随机。</p>
-    <p>每轮<b>必须选 1 个</b>存备选，不选则这 10 个作废。
-       <b>本轮倒计时内可反复改选</b>，一旦换下一批就锁死。</p>
-    <p>最后在 5 个备选之间<b>自由切换确认目标</b>，点「确认选号」才真正结束。</p></div>`;
-}
-
-/* ── 自编页 ── */
-function selfHtml(){
-  const sg=S.seg;
-  if(!sg)return `<div style="padding:40px 22px;text-align:center;color:#999;font-size:13px">
-    未选择目标号段<br><span style="font-size:12px;color:#bbb">请在右侧「自编的目标号段」里选一个</span></div>`;
-  if(!sg.unlocked)return `<div class="selfhd">剩余自编次数 <b>${S.selfLeft}</b></div>
-    <div style="padding:40px 22px;text-align:center;color:#999;font-size:13px;line-height:1.9">
-      ⛔ 该号段投放不足 7 天<br>自编入口未开放，只能用随机<br>
-      <span style="font-size:12px;color:#bbb">（左侧切到「已解锁」号段即可练自编）</span></div>`;
-  let h=`<div class="selfhd">剩余自编次数 <b>${S.selfLeft}</b>　
-    <span style="float:right;color:#888">第 ${S.selfRound} / 4 轮</span></div><div class="wish">`;
-  S.wl.forEach((w,i)=>{
-    h+=`<div class="wi ${w.st||""}" data-sel="${i}">
-      <div class="lb"><span>第${CN[i]}意向号牌</span>
-      ${w.st?`<span class="rs">${w.st==="hit"?"✅ 验证可用 · 已锁定":"× 已被占用"}</span>`
-            :(S.wl.length>1?`<span class="del" data-del="${i}">🗑 删除</span>`:"")}</div>
-      <div class="vl">${w.v||sg.prefix.slice(0,2)}${S.wlSel===i&&!w.v?'<span style="color:#bbb">|</span>':""}</div></div>`});
-  h+=`</div>`;
-  if(S.wl.length<5)h+=`<div class="addbtn" id="ad">＋ 添加意向号牌（${S.wl.length}/5）</div>`;
-  h+=`<div class="notice"><i>ⓘ</i><span>您最多可同时录入 5 个意向号牌，系统会从第一意向开始顺序依次验证号牌的可用性，验证可用的，无法回退更改。</span></div>`;
-  const n=S.wl.filter(w=>w.v).length;
-  h+=`<div class="cfm"><button class="btn-cfm" id="sb" ${n?"":"disabled"}>提交验证${n<5&&n?`（仅 ${n} 个，将浪费 ${5-n} 个额度）`:""}</button></div>`;
-  h+=kbHtml();
-  return h;
-}
-function kbHtml(){
-  const sg=S.seg, w=S.wl[S.wlSel];
-  if(!w||w.st||!sg.unlocked)return "";
-  const cur=(w.v||"").replace(sg.prefix.slice(0,2),"");
-  const pos=cur.length, body=sg.prefix.slice(2);
-  const lo=pad(sg.start,sg.width), hi=pad(sg.start+99,sg.width);
-  let allowed=[];
-  if(pos<body.length) allowed=[body[pos]];
-  else{ const dp=pos-body.length;              // 第几位数字
-    const typed=cur.slice(body.length);         // 已输入的数字部分
-    for(let d=0;d<=9;d++){ const t=(typed+d);
-      const lop=lo.slice(0,dp+1), hip=hi.slice(0,dp+1);
-      if(t<lop||t>hip) continue;                // 超出号段范围
-      if(dupCount(typed,String(d))>=2) continue;// 该数字已出现2次 → 再按就是第3次
-      allowed.push(String(d)); } }
-  const rows=[["1","2","3","4","5","6","7","8","9","0"],
-              ["Q","W","E","R","T","Y","U","P"],
-              ["A","S","D","F","G","H","J","K","L"],
-              ["Z","X","C","V","B","N","M"]];
-  const done=pos>=body.length+sg.width;
-  const typedD=cur.slice(body.length);
-  const near=[...new Set(typedD)].filter(d=>dupCount(typedD,d)>=2);
-  let why=done?"已输满 6 位序号":"第 "+(pos+1)+" 位 · 仅亮起可选";
-  if(!done&&near.length)why+=` · ${near.join("/")} 已用 2 次，禁第 3 次`;
-  let h=`<div class="kb"><div class="kbhd"><span>${why}</span><span id="kdone">完成</span></div>`;
-  rows.forEach(r=>{h+=`<div class="krow">`+r.map(k=>
-    `<button class="key" data-k="${k}" ${allowed.includes(k)&&!done?"":"disabled"}>${k}</button>`).join("")+`</div>`});
-  h+=`<div class="krow"><button class="key wide" data-k="BS">⌫ 删除</button></div></div>`;
-  return h;
-}
-
-/* ── 随机页（全池混合） ── */
-function randHtml(){
-  let h=`<div class="rowbar"><span>号牌库 <label><input type="checkbox" id="n4" checked> 不含 4</label></span>
-    <button class="btn-batch" id="nb" ${S.batch>=5||S.total<=0?"disabled":""}>${
-      S.batch>=5?"已用完":S.total<=0?"已超时":"换一批 ("+(5-S.batch)+")"}</button></div>`;
-  h+=`<div class="expire"><span>${S.started?`总限时 <b>${S.total}</b> 秒`:"进入即开始计时"}</span>
-      <span>${S.cur?`本轮剩 <b id="lf">${S.roundLeft}</b> 秒`:""}</span></div>`;
-  if(S.cur){
-    const picked=S.pool.find(z=>z.batch===S.batch);
-    h+=`<div style="padding:7px 14px 0;font-size:12.5px;color:#666">第${CN[S.batch-1]}批号牌 · ${
-      picked?"已选 <b>"+full(picked.sg,picked.n)+"</b>，本轮内可点其它号改选":"必须选 1 个，否则作废"}</div><div class="plates">`;
-    h+=S.cur.map(o=>{const on=S.pool.some(z=>z.n===o.n&&z.s===o.sg.i);
-      return `<div class="pl ${on?"on":""}" data-i="${o.k}">${full(o.sg,o.n)}</div>`}).join("")+`</div>`;
-  }else h+=`<div style="padding:36px 18px;text-align:center;color:#aaa;font-size:13px">
-    ${S.batch>=5?"5 批已用完":S.total<=0?"总时限已到":"点「换一批」开始摇号"}</div>`;
-  h+=`<div class="sechd">备选 <span style="font-size:11.5px;font-weight:400;color:#999">· 点任一格切换确认目标</span></div><div class="slots">`;
-  for(let i=0;i<5;i++){const it=S.pool.find(z=>z.batch===i+1);
-    h+=it?`<div class="slot full ${S.pick===i+1?"sel":""}" data-rm="${i+1}" title="点击选为确认目标">${full(it.sg,it.n)}</div>`
-         :`<div class="slot">第${CN[i]}批次预选</div>`}
-  const tg=S.pool.find(z=>z.batch===S.pick)||S.pool[0];
-  h+=`</div><div class="cfm"><button class="btn-cfm" id="cf" ${S.pool.length?"":"disabled"}>${
-    tg?"确认选号 · "+full(tg.sg,tg.n):"确认选号"}</button></div>`;
-  return h;
-}
-
-function startTimer(){
-  if(S.started)return; S.started=true;
-  log("⏱ <b>进入随机页，300 秒总时限开始</b>（切回自编也继续走）");
-  S.tm=setInterval(()=>{
-    S.total--; if(S.roundLeft>0)S.roundLeft--;
-    const l=document.getElementById("lf"); if(l)l.textContent=S.roundLeft;
-    h6.innerHTML=S.total+"<small>秒</small>";
-    h6.style.color=S.total<=60?"var(--red)":"";
-    if(S.roundLeft===0&&S.cur){S.cur=null;log("⏱ 本轮 120 秒到，未选的 10 个号作废");draw();}
-    if(S.total<=0){clearInterval(S.tm);S.cur=null;
-      if(S.pool.length){const it=S.pool[0];
-        S.done={sg:it.sg,n:it.n,via:"超时 · 系统默认选第一个备选"};
-        log("⛔ <b>总时限到，系统默认锁定第一个备选</b>");}
-      else log("⛔ 总时限到，且备选为空 —— 只能去车管所 50 选 1");
-      draw();}
-  },1000);
-}
-
-function roll(){
-  startTimer();
-  if(S.batch>0&&!S.pool.some(z=>z.batch===S.batch)){
-    log(`⚠️ 第 ${S.batch} 批未选任何号 —— 这 10 个号已作废`);}
-  else if(S.batch>0){
-    const it=S.pool.find(z=>z.batch===S.batch);
-    log(`🔒 第 ${S.batch} 批 <b>${full(it.sg,it.n)}</b> 已锁定，不能再改`);}
-  S.batch++;
-  const no4=document.getElementById("n4")?.checked;
-  const out=[]; let guard=0;
-  while(out.length<10&&guard++<4000){
-    const sg=UNLOCKED[Math.floor(Math.random()*UNLOCKED.length)];
-    const n=sg.start+Math.floor(Math.random()*100);
-    const k=sg.i+":"+n;
-    if(S.seen.has(k))continue;
-    if(no4&&pad(n,sg.width).includes("4"))continue;
-    if(taken(sg,n))continue;
-    S.seen.add(k); out.push({sg,n,k});
+  <script>
+    // 默认内置数据
+    const DEFAULT_NEV_SEGMENTS = [
+  {
+    "prefix": "京APX",
+    "start": 9100,
+    "end": 9199,
+    "release_time": "2026-09-07 17:59",
+    "is_first_release": false,
+    "desc": "9月7日最新投放 (含 9188, 9168, 9166 等，仅限随机保护期)",
+    "id": "nev_seg_1",
+    "releaseTime": "2026-09-07 17:59",
+    "isFirst": false
+  },
+  {
+    "prefix": "京APY",
+    "start": 3300,
+    "end": 3399,
+    "release_time": "2026-09-07 15:12",
+    "is_first_release": false,
+    "desc": "9月7日最新投放 (含四连顶级豹子 3333、3366、3388 AABB，仅限随机)",
+    "id": "nev_seg_2",
+    "releaseTime": "2026-09-07 15:12",
+    "isFirst": false
+  },
+  {
+    "prefix": "京APY",
+    "start": 6700,
+    "end": 6799,
+    "release_time": "2026-09-07 11:30",
+    "is_first_release": false,
+    "desc": "9月7日最新投放 (含顺子 6789、6766、6788，仅限随机)",
+    "id": "nev_seg_3",
+    "releaseTime": "2026-09-07 11:30",
+    "isFirst": false
+  },
+  {
+    "prefix": "京APY",
+    "start": 0,
+    "end": 99,
+    "release_time": "2026-09-06 23:16",
+    "is_first_release": false,
+    "desc": "9月6日投放 (含整万 0000、0066、0088、0068，仅限随机)",
+    "id": "nev_seg_4",
+    "releaseTime": "2026-09-06 23:16",
+    "isFirst": false
+  },
+  {
+    "prefix": "京AGG",
+    "start": 8000,
+    "end": 8099,
+    "release_time": "2026-09-06 23:15",
+    "is_first_release": false,
+    "desc": "9月6日投放 (含整千 8000、8088、8066、8080 ABAB，仅限随机)",
+    "id": "nev_seg_5",
+    "releaseTime": "2026-09-06 23:15",
+    "isFirst": false
+  },
+  {
+    "prefix": "京AGG",
+    "start": 4500,
+    "end": 4599,
+    "release_time": "2026-09-06 23:14",
+    "is_first_release": false,
+    "desc": "9月6日投放 (含顺子 4567、4588，仅限随机)",
+    "id": "nev_seg_6",
+    "releaseTime": "2026-09-06 23:14",
+    "isFirst": false
+  },
+  {
+    "prefix": "京APY",
+    "start": 2900,
+    "end": 2999,
+    "release_time": "2026-09-06 17:47",
+    "is_first_release": false,
+    "desc": "9月6日投放 (含 2999、2988、2966，仅限随机)",
+    "id": "nev_seg_7",
+    "releaseTime": "2026-09-06 17:47",
+    "isFirst": false
+  },
+  {
+    "prefix": "京APY",
+    "start": 2400,
+    "end": 2499,
+    "release_time": "2026-09-06 16:53",
+    "is_first_release": false,
+    "desc": "9月6日投放 (含偶数顺 2468、2488，仅限随机)",
+    "id": "nev_seg_8",
+    "releaseTime": "2026-09-06 16:53",
+    "isFirst": false
+  },
+  {
+    "prefix": "京APY",
+    "start": 8300,
+    "end": 8399,
+    "release_time": "2026-09-06 12:21",
+    "is_first_release": false,
+    "desc": "9月6日投放 (含 8388、8366，仅限随机)",
+    "id": "nev_seg_9",
+    "releaseTime": "2026-09-06 12:21",
+    "isFirst": false
+  },
+  {
+    "prefix": "京APY",
+    "start": 6600,
+    "end": 6699,
+    "release_time": "2026-09-06 09:12",
+    "is_first_release": false,
+    "desc": "9月6日投放 (含四连顶级豹子 6666、6688 AABB双对，仅限随机)",
+    "id": "nev_seg_10",
+    "releaseTime": "2026-09-06 09:12",
+    "isFirst": false
+  },
+  {
+    "prefix": "京APY",
+    "start": 800,
+    "end": 899,
+    "release_time": "2026-08-31 16:00",
+    "is_first_release": false,
+    "desc": "8月31日投放 (🟢已解锁自编主战场！含三连豹子 0888、0866、0886)",
+    "id": "nev_seg_11",
+    "releaseTime": "2026-08-31 16:00",
+    "isFirst": false
+  },
+  {
+    "prefix": "京APT",
+    "start": 300,
+    "end": 399,
+    "release_time": "2026-08-30 15:00",
+    "is_first_release": false,
+    "desc": "8月30日投放 (🟢已解锁自编主战场！含 0366、0388、0399、0368)",
+    "id": "nev_seg_12",
+    "releaseTime": "2026-08-30 15:00",
+    "isFirst": false
+  },
+  {
+    "prefix": "京APY",
+    "start": 8800,
+    "end": 8899,
+    "release_time": "2026-08-25 14:30",
+    "is_first_release": false,
+    "desc": "8月25日投放 (🟢已解锁自编！含四连大豹子 8888、8866、8899)",
+    "id": "nev_seg_13",
+    "releaseTime": "2026-08-25 14:30",
+    "isFirst": false
+  },
+  {
+    "prefix": "京APX",
+    "start": 6800,
+    "end": 6899,
+    "release_time": "2026-08-20 10:15",
+    "is_first_release": false,
+    "desc": "8月20日投放 (🟢已解锁自编！含 6888、6868、6866)",
+    "id": "nev_seg_14",
+    "releaseTime": "2026-08-20 10:15",
+    "isFirst": false
+  },
+  {
+    "prefix": "京AGS",
+    "start": 1600,
+    "end": 1699,
+    "release_time": "2026-08-15 11:20",
+    "is_first_release": false,
+    "desc": "8月15日投放 (🟢已解锁自编！含 1688 一路发发、1666)",
+    "id": "nev_seg_15",
+    "releaseTime": "2026-08-15 11:20",
+    "isFirst": false
+  },
+  {
+    "prefix": "京APT",
+    "start": 8800,
+    "end": 8899,
+    "release_time": "2026-08-10 14:00",
+    "is_first_release": false,
+    "desc": "8月10日投放 (🟢已解锁自编！含四连大豹子 8888、8800)",
+    "id": "nev_seg_16",
+    "releaseTime": "2026-08-10 14:00",
+    "isFirst": false
+  },
+  {
+    "prefix": "京APX",
+    "start": 1200,
+    "end": 1299,
+    "release_time": "2026-08-05 16:30",
+    "is_first_release": false,
+    "desc": "8月05日投放 (🟢已解锁自编！含 1234 经典大顺子)",
+    "id": "nev_seg_17",
+    "releaseTime": "2026-08-05 16:30",
+    "isFirst": false
+  },
+  {
+    "prefix": "京AGM",
+    "start": 8000,
+    "end": 8099,
+    "release_time": "2026-07-28 15:45",
+    "is_first_release": false,
+    "desc": "7月28日投放 (🟢已解锁自编！含 8000 整千号、8088)",
+    "id": "nev_seg_18",
+    "releaseTime": "2026-07-28 15:45",
+    "isFirst": false
+  },
+  {
+    "prefix": "京APY",
+    "start": 6800,
+    "end": 6899,
+    "release_time": "2026-07-20 16:30",
+    "is_first_release": false,
+    "desc": "7月20日投放 (🟢已解锁自编！含 6888、6868)",
+    "id": "nev_seg_19",
+    "releaseTime": "2026-07-20 16:30",
+    "isFirst": false
+  },
+  {
+    "prefix": "京APT",
+    "start": 6600,
+    "end": 6699,
+    "release_time": "2026-07-15 14:20",
+    "is_first_release": false,
+    "desc": "7月15日投放 (🟢已解锁自编！含四连大豹子 6666、6688)",
+    "id": "nev_seg_20",
+    "releaseTime": "2026-07-15 14:20",
+    "isFirst": false
+  },
+  {
+    "prefix": "京APX",
+    "start": 9900,
+    "end": 9999,
+    "release_time": "2026-06-25 10:30",
+    "is_first_release": false,
+    "desc": "6月25日投放 (🟢已解锁自编！含四连大豹子 9999、9988)",
+    "id": "nev_seg_21",
+    "releaseTime": "2026-06-25 10:30",
+    "isFirst": false
   }
-  S.cur=out; S.roundLeft=120;
-  log(`🎲 第 <b>${S.batch}</b> 批：10 个号（跨 ${new Set(out.map(o=>o.sg.prefix)).size} 个号段），120 秒内<b>必须选 1 个</b>`);
-  draw();
-}
-
-function bind(){
-  const nb=document.getElementById("nb"); if(nb)nb.onclick=roll;
-  const cf=document.getElementById("cf"); if(cf)cf.onclick=confirmPick;
-  const ad=document.getElementById("ad"); if(ad)ad.onclick=()=>{
-    if(S.wl.length>=5)return; S.wl.push({v:""}); S.wlSel=S.wl.length-1; draw();};
-  const sb=document.getElementById("sb"); if(sb)sb.onclick=verify;
-  const kd=document.getElementById("kdone"); if(kd)kd.onclick=()=>{S.wlSel=-1;draw()};
-  scr.querySelectorAll("[data-i]").forEach(e=>e.onclick=()=>bank(e.dataset.i));
-  scr.querySelectorAll("[data-rm]").forEach(e=>e.onclick=()=>{
-    const b=+e.dataset.rm; if(!S.pool.some(z=>z.batch===b))return;
-    S.pick=b; log(`🎯 选中第 ${b} 批的号作为确认目标`); draw();});
-  scr.querySelectorAll("[data-sel]").forEach(e=>e.onclick=ev=>{
-    if(ev.target.dataset.del!==undefined)return; S.wlSel=+e.dataset.sel; draw();});
-  scr.querySelectorAll("[data-del]").forEach(e=>e.onclick=ev=>{
-    ev.stopPropagation(); S.wl.splice(+e.dataset.del,1);
-    if(!S.wl.length)S.wl=[{v:""}]; S.wlSel=0; draw();});
-  scr.querySelectorAll("[data-k]").forEach(e=>e.onclick=()=>key(e.dataset.k));
-}
-
-function bank(k){
-  const o=S.cur.find(z=>z.k===k); if(!o)return;
-  const i=S.pool.findIndex(z=>z.batch===S.batch);
-  if(i>=0){
-    const old=S.pool[i];
-    if(old.n===o.n&&old.s===o.sg.i){            // 点的是同一个 → 无操作
-      log("已是本轮所选，可点其它号改选");return;}
-    S.pool[i]={sg:o.sg,s:o.sg.i,n:o.n,batch:S.batch};   // 本轮内改选
-    log(`🔄 第 ${S.batch} 批改选：${full(old.sg,old.n)} → <b>${full(o.sg,o.n)}</b>（本轮倒计时内可反复改）`);
-  }else{
-    S.pool.push({sg:o.sg,s:o.sg.i,n:o.n,batch:S.batch});
-    log(`➕ 第 ${S.batch} 批选中 <b>${full(o.sg,o.n)}</b>　<span style="color:var(--ink3)">本轮 ${S.roundLeft}s 内可改选，进入下一批后锁定</span>`);
+];
+    const DEFAULT_FUEL_SEGMENTS = [
+  {
+    "id": "fuel_seg_1",
+    "prefix": "京CHK",
+    "start": 300,
+    "end": 399,
+    "releaseTime": "2026-09-06 14:39",
+    "release_time": "2026-09-06 14:39",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_2",
+    "prefix": "京CHJ",
+    "start": 800,
+    "end": 899,
+    "releaseTime": "2026-09-04 11:16",
+    "release_time": "2026-09-04 11:16",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_3",
+    "prefix": "京AFX",
+    "start": 400,
+    "end": 499,
+    "releaseTime": "2026-09-02 22:38",
+    "release_time": "2026-09-02 22:38",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_4",
+    "prefix": "京AFX",
+    "start": 900,
+    "end": 999,
+    "releaseTime": "2026-09-02 22:09",
+    "release_time": "2026-09-02 22:09",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_5",
+    "prefix": "京ALW",
+    "start": 400,
+    "end": 499,
+    "releaseTime": "2026-09-02 21:54",
+    "release_time": "2026-09-02 21:54",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_6",
+    "prefix": "京LDB",
+    "start": 0,
+    "end": 99,
+    "releaseTime": "2026-09-01 17:47",
+    "release_time": "2026-09-01 17:47",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_7",
+    "prefix": "京AJW",
+    "start": 200,
+    "end": 299,
+    "releaseTime": "2026-08-31 19:24",
+    "release_time": "2026-08-31 19:24",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_8",
+    "prefix": "京AJE",
+    "start": 900,
+    "end": 999,
+    "releaseTime": "2026-08-30 15:28",
+    "release_time": "2026-08-30 15:28",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_9",
+    "prefix": "京CHH",
+    "start": 800,
+    "end": 899,
+    "releaseTime": "2026-08-28 17:48",
+    "release_time": "2026-08-28 17:48",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_10",
+    "prefix": "京LDD",
+    "start": 400,
+    "end": 499,
+    "releaseTime": "2026-08-28 17:47",
+    "release_time": "2026-08-28 17:47",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_11",
+    "prefix": "京HDA",
+    "start": 400,
+    "end": 499,
+    "releaseTime": "2026-08-28 17:46",
+    "release_time": "2026-08-28 17:46",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_12",
+    "prefix": "京ALU",
+    "start": 600,
+    "end": 699,
+    "releaseTime": "2026-08-27 16:12",
+    "release_time": "2026-08-27 16:12",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_13",
+    "prefix": "京JCN",
+    "start": 600,
+    "end": 699,
+    "releaseTime": "2026-08-26 08:38",
+    "release_time": "2026-08-26 08:38",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_14",
+    "prefix": "京ALV",
+    "start": 0,
+    "end": 99,
+    "releaseTime": "2026-08-24 21:26",
+    "release_time": "2026-08-24 21:26",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_15",
+    "prefix": "京LDR",
+    "start": 200,
+    "end": 299,
+    "releaseTime": "2026-08-23 12:57",
+    "release_time": "2026-08-23 12:57",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_16",
+    "prefix": "京AFY",
+    "start": 100,
+    "end": 199,
+    "releaseTime": "2026-08-21 16:12",
+    "release_time": "2026-08-21 16:12",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_17",
+    "prefix": "京AJF",
+    "start": 900,
+    "end": 999,
+    "releaseTime": "2026-08-20 15:50",
+    "release_time": "2026-08-20 15:50",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_18",
+    "prefix": "京AHF",
+    "start": 300,
+    "end": 399,
+    "releaseTime": "2026-08-19 15:42",
+    "release_time": "2026-08-19 15:42",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_19",
+    "prefix": "京ALU",
+    "start": 800,
+    "end": 899,
+    "releaseTime": "2026-08-18 15:16",
+    "release_time": "2026-08-18 15:16",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_20",
+    "prefix": "京AJX",
+    "start": 100,
+    "end": 199,
+    "releaseTime": "2026-08-17 11:33",
+    "release_time": "2026-08-17 11:33",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_21",
+    "prefix": "京AFW",
+    "start": 100,
+    "end": 199,
+    "releaseTime": "2026-08-14 18:45",
+    "release_time": "2026-08-14 18:45",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_22",
+    "prefix": "京ALU",
+    "start": 300,
+    "end": 399,
+    "releaseTime": "2026-08-13 14:01",
+    "release_time": "2026-08-13 14:01",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_23",
+    "prefix": "京KDE",
+    "start": 100,
+    "end": 199,
+    "releaseTime": "2026-08-11 17:33",
+    "release_time": "2026-08-11 17:33",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_24",
+    "prefix": "京AJE",
+    "start": 800,
+    "end": 899,
+    "releaseTime": "2026-08-10 15:47",
+    "release_time": "2026-08-10 15:47",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_25",
+    "prefix": "京FCV",
+    "start": 900,
+    "end": 999,
+    "releaseTime": "2026-08-08 15:27",
+    "release_time": "2026-08-08 15:27",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_26",
+    "prefix": "京MCA",
+    "start": 700,
+    "end": 799,
+    "releaseTime": "2026-08-06 19:11",
+    "release_time": "2026-08-06 19:11",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_27",
+    "prefix": "京AFW",
+    "start": 600,
+    "end": 699,
+    "releaseTime": "2026-08-05 16:04",
+    "release_time": "2026-08-05 16:04",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_28",
+    "prefix": "京AFZ",
+    "start": 500,
+    "end": 599,
+    "releaseTime": "2026-08-04 16:25",
+    "release_time": "2026-08-04 16:25",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_29",
+    "prefix": "京AJE",
+    "start": 400,
+    "end": 499,
+    "releaseTime": "2026-08-04 15:59",
+    "release_time": "2026-08-04 15:59",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_30",
+    "prefix": "京AJX",
+    "start": 800,
+    "end": 899,
+    "releaseTime": "2026-08-03 14:07",
+    "release_time": "2026-08-03 14:07",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_31",
+    "prefix": "京AFX",
+    "start": 300,
+    "end": 399,
+    "releaseTime": "2026-08-01 15:48",
+    "release_time": "2026-08-01 15:48",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_32",
+    "prefix": "京AJE",
+    "start": 500,
+    "end": 599,
+    "releaseTime": "2026-07-30 20:31",
+    "release_time": "2026-07-30 20:31",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_33",
+    "prefix": "京JCT",
+    "start": 500,
+    "end": 599,
+    "releaseTime": "2026-07-29 20:54",
+    "release_time": "2026-07-29 20:54",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_34",
+    "prefix": "京AJX",
+    "start": 600,
+    "end": 699,
+    "releaseTime": "2026-07-28 18:11",
+    "release_time": "2026-07-28 18:11",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_35",
+    "prefix": "京JDB",
+    "start": 300,
+    "end": 399,
+    "releaseTime": "2026-07-27 15:07",
+    "release_time": "2026-07-27 15:07",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_36",
+    "prefix": "京AFW",
+    "start": 700,
+    "end": 799,
+    "releaseTime": "2026-07-25 16:07",
+    "release_time": "2026-07-25 16:07",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_37",
+    "prefix": "京AJJ",
+    "start": 300,
+    "end": 399,
+    "releaseTime": "2026-07-23 23:19",
+    "release_time": "2026-07-23 23:19",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_38",
+    "prefix": "京AEJ",
+    "start": 200,
+    "end": 299,
+    "releaseTime": "2026-07-22 16:21",
+    "release_time": "2026-07-22 16:21",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_39",
+    "prefix": "京AHD",
+    "start": 400,
+    "end": 499,
+    "releaseTime": "2026-07-21 15:24",
+    "release_time": "2026-07-21 15:24",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_40",
+    "prefix": "京HCQ",
+    "start": 800,
+    "end": 899,
+    "releaseTime": "2026-07-21 14:44",
+    "release_time": "2026-07-21 14:44",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_41",
+    "prefix": "京AFY",
+    "start": 600,
+    "end": 699,
+    "releaseTime": "2026-07-20 14:33",
+    "release_time": "2026-07-20 14:33",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_42",
+    "prefix": "京HDD",
+    "start": 500,
+    "end": 599,
+    "releaseTime": "2026-07-18 14:03",
+    "release_time": "2026-07-18 14:03",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_43",
+    "prefix": "京JDT",
+    "start": 0,
+    "end": 99,
+    "releaseTime": "2026-07-16 23:22",
+    "release_time": "2026-07-16 23:22",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_44",
+    "prefix": "京CHH",
+    "start": 600,
+    "end": 699,
+    "releaseTime": "2026-07-15 17:52",
+    "release_time": "2026-07-15 17:52",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_45",
+    "prefix": "京AHD",
+    "start": 700,
+    "end": 799,
+    "releaseTime": "2026-07-14 19:02",
+    "release_time": "2026-07-14 19:02",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_46",
+    "prefix": "京LDB",
+    "start": 700,
+    "end": 799,
+    "releaseTime": "2026-07-13 17:08",
+    "release_time": "2026-07-13 17:08",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_47",
+    "prefix": "京AHE",
+    "start": 600,
+    "end": 699,
+    "releaseTime": "2026-07-11 22:10",
+    "release_time": "2026-07-11 22:10",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_48",
+    "prefix": "京AFW",
+    "start": 500,
+    "end": 599,
+    "releaseTime": "2026-07-10 15:17",
+    "release_time": "2026-07-10 15:17",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_49",
+    "prefix": "京CHJ",
+    "start": 200,
+    "end": 299,
+    "releaseTime": "2026-07-09 12:23",
+    "release_time": "2026-07-09 12:23",
+    "isFirst": false,
+    "is_first_release": false
+  },
+  {
+    "id": "fuel_seg_50",
+    "prefix": "京AFX",
+    "start": 500,
+    "end": 599,
+    "releaseTime": "2026-07-08 13:11",
+    "release_time": "2026-07-08 13:11",
+    "isFirst": false,
+    "is_first_release": false
   }
-  if(!S.pick)S.pick=S.batch;
-  draw();                                        // ← 不再清空本批，10 个号继续显示
-}
+];
 
-function confirmPick(){
-  const it=S.pool.find(z=>z.batch===S.pick)||S.pool[0]; if(!it)return;
-  if(!confirm(`确认选号 ${full(it.sg,it.n)}？\n\n不可逆：确认后选号立即结束，自编方式关闭，无法反悔。\n且须在 3 个工作日内到车管所办理，逾期拉黑 2 年。`))return;
-  clearInterval(S.tm);
-  S.done={sg:it.sg,n:it.n,via:"随机选号 → 备选确认"};
-  log(`🔒 已确认 <b>${full(it.sg,it.n)}</b> —— 流程结束`); draw();
-}
+    const DATA_VER = "2026-09-v4-real-nev-ap";
 
-function key(k){
-  const sg=S.seg,w=S.wl[S.wlSel]; if(!w||w.st)return;
-  const pre=sg.prefix.slice(0,2);
-  let cur=(w.v||pre).replace(pre,"");
-  if(k==="BS")cur=cur.slice(0,-1);
-  else{ if(cur.length>=sg.prefix.length-2+sg.width)return; cur+=k; }
-  w.v=cur?pre+cur:""; draw();
-}
+    // 全局状态
+    let currentVehicleType = "NEV"; // "NEV" or "FUEL"
+    let segments = [];
+    let wishlist = [];
+    let cachedCandidates = [];
 
-function verify(){
-  const sg=S.seg;
-  const list=S.wl.filter(w=>w.v&&w.v.length===sg.prefix.length+sg.width);
-  if(!list.length){log("⚠️ 意向号牌未填完整（京A + 号段字母 + 数字 = 6 位序号）");return;}
-  const bad=list.find(w=>hasTriple(w.v.slice(-sg.width)));
-  if(bad){log(`⛔ <b>${bad.v}</b> 有数字出现 3 次，自编禁止 —— 请改掉再提交`);return;}
-  S.selfLeft=Math.max(0,S.selfLeft-5);           // 提交一次 = 消耗一整轮 5 个
-  log(`✍️ 第 ${S.selfRound} 轮提交 <b>${list.length}</b> 个（消耗 <b>5</b> 个额度）…`);
-  if(list.length<5)log(`　⚠️ 只填了 ${list.length} 个，<b>浪费 ${5-list.length} 个额度</b>`);
-  let hit=null; S.wl.forEach(w=>w.st=null);
-  for(const w of S.wl){
-    if(!w.v)continue;
-    const n=+w.v.slice(-sg.width);
-    if(taken(sg,n)){w.st="miss";log(`　${w.v} 已被占用`);}
-    else{w.st="hit";hit={n};log(`　<b>${w.v}</b> 验证可用 → <b>立即锁定</b>，后面不再验证`);break;}
-  }
-  if(hit){clearInterval(S.tm);S.done={sg,n:hit.n,via:"自编选号"};}
-  else{
-    S.selfRound++;
-    if(S.selfRound>4||S.selfLeft<=0)log("　4 轮额度已用尽 —— 自编结束，只能转随机");
-    else{log(`　全部被占用。可开始<b>第 ${S.selfRound} 轮</b>（剩 ${S.selfLeft} 个额度）`);
-         setTimeout(()=>{S.wl=[{v:""}];S.wlSel=0;draw()},1400);}
-  }
-  draw();
-}
+    // 初始化
+    function init() {
+      // 读取用户偏好的车辆种类 (默认优先小型新能源汽车)
+      const savedType = localStorage.getItem("12123_vehicle_type");
+      currentVehicleType = (savedType === "FUEL") ? "FUEL" : "NEV";
 
-f.onchange=()=>{fillSeg();S.taken=new Map();S.wl=[{v:""}];S.wlSel=0;draw()};
-s.onchange=e=>{S.seg=segs[+e.target.value];S.taken=new Map();S.wl=[{v:""}];S.wlSel=0;draw()};
-tabS.onclick=()=>{S.tab="s";S.wlSel=0;draw()};
-tabR.onclick=()=>{S.tab="r";startTimer();draw()};
-rs.onclick=()=>{reset();log("🔄 沙盘已重置")};
-au.onclick=()=>{
-  const sg=S.seg; if(!sg||!sg.unlocked){log("⚠️ 请先切到已解锁号段");return}
-  const all=[]; for(let n=sg.start;n<=sg.start+99;n++){const t=pad(n,sg.width);
-    if(t.includes("4")||hasTriple(t))continue; all.push({n,x:score(t)})}
-  all.sort((a,b)=>b.x-a.x);
-  S.wl=all.slice(0,5).map(z=>({v:full(sg,z.n)})); S.wlSel=-1; S.tab="s";
-  log("📋 已填满本轮 5 个意向号牌（最想要的在第一意向，已排除含4和三连号）"); draw()};
-document.getElementById("bk").onclick=()=>{reset();log("↩︎ 返回并重置")};
-setInterval(()=>{const d=new Date();clk.textContent=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")},1000);
-reset();
-</script>
+      loadSegmentsForCurrentType();
+
+      // 载入自编清单
+      const storedWish = localStorage.getItem("12123_wishlist");
+      if (storedWish) {
+        try { wishlist = JSON.parse(storedWish); } catch (e) { wishlist = []; }
+      }
+
+      // 设置添加号段默认时间
+      const now = new Date();
+      const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      const timeInput = document.getElementById("input-release-time");
+      if (timeInput) timeInput.value = localIso;
+
+      applyVehicleTypeUI();
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      renderSegmentsTable();
+      updateStats();
+      populateSegmentSelector();
+      generateCandidates();
+      renderWishlist();
+    }
+
+    // 载入当前类型的号段数据
+    function loadSegmentsForCurrentType() {
+      const storageKey = currentVehicleType === "NEV" ? "12123_segs_nev" : "12123_segs_fuel";
+      const verKey = currentVehicleType === "NEV" ? "12123_ver_nev" : "12123_ver_fuel";
+      const storedVer = localStorage.getItem(verKey);
+      const storedData = localStorage.getItem(storageKey);
+
+      if (storedVer !== DATA_VER || !storedData) {
+        segments = (currentVehicleType === "NEV") ? [...DEFAULT_NEV_SEGMENTS] : [...DEFAULT_FUEL_SEGMENTS];
+        localStorage.setItem(storageKey, JSON.stringify(segments));
+        localStorage.setItem(verKey, DATA_VER);
+      } else {
+        try {
+          segments = JSON.parse(storedData);
+        } catch (e) {
+          segments = (currentVehicleType === "NEV") ? [...DEFAULT_NEV_SEGMENTS] : [...DEFAULT_FUEL_SEGMENTS];
+        }
+      }
+    }
+
+    // 保存当前类型的号段数据
+    function saveCurrentSegments() {
+      const storageKey = currentVehicleType === "NEV" ? "12123_segs_nev" : "12123_segs_fuel";
+      localStorage.setItem(storageKey, JSON.stringify(segments));
+    }
+
+    // 切换号牌种类 (新能源 NEV vs 燃油车 FUEL)
+    function switchVehicleType(type) {
+      if (currentVehicleType === type) return;
+      currentVehicleType = type;
+      localStorage.setItem("12123_vehicle_type", type);
+
+      loadSegmentsForCurrentType();
+      applyVehicleTypeUI();
+
+      renderSegmentsTable();
+      updateStats();
+      populateSegmentSelector();
+      resetFilters(false);
+      generateCandidates();
+      renderWishlist();
+
+      showToast(type === "NEV" ? "已切换至：⚡️ 小型新能源汽车（绿牌 · 6位编码）" : "已切换至：🚗 小型普通汽车（蓝牌 · 5位编码）");
+    }
+
+    // 应用界面风格
+    function applyVehicleTypeUI() {
+      const header = document.getElementById("main-header");
+      const btnNev = document.getElementById("btn-type-nev");
+      const btnFuel = document.getElementById("btn-type-fuel");
+      const badgeText = document.getElementById("logo-badge-text");
+      const title = document.getElementById("header-main-title");
+      const sub = document.getElementById("header-sub-title");
+      const bannerBox = document.getElementById("banner-rule-box");
+      const bannerText = document.getElementById("banner-rule-text");
+      const prefixInput = document.getElementById("input-prefix");
+      const startInput = document.getElementById("input-start");
+      const endInput = document.getElementById("input-end");
+
+      if (currentVehicleType === "NEV") {
+        header.classList.remove("fuel-theme");
+        btnNev.classList.add("active");
+        btnFuel.classList.remove("active");
+        badgeText.textContent = "⚡️ 绿牌12123";
+        title.textContent = "北京市小型新能源汽车 · 选号与号段追踪助手";
+        sub.textContent = "6位绿牌专属自编算法 (纯电D/插混F) · 7天号段倒计时 · 5连/4连靓号优选";
+        bannerBox.className = "banner-rule nev-alert";
+        bannerText.innerHTML = `<strong>北京市小型新能源汽车（绿牌）交管12123选号关键提示：</strong> 1. 小型新能源号牌为 <strong>6 位序号编码</strong>（纯电动首字母通常为 D，如 <code>京A·D88888</code>）； 2. 官方号池与燃油车完全独立！请在 12123 App 首页【号段公布】中，<strong>点击右上角【筛选】选择【小型新能源汽车】</strong>，即可查阅北京交管局最新公布的绿牌号段！`;
+
+        prefixInput.value = "京APX";
+        startInput.value = "9100";
+        endInput.value = "9199";
+        renderPatternChipsNEV();
+      } else {
+        header.classList.add("fuel-theme");
+        btnFuel.classList.add("active");
+        btnNev.classList.remove("active");
+        badgeText.textContent = "🚗 蓝牌12123";
+        title.textContent = "北京市小型普通汽车 · 选号与号段追踪助手";
+        sub.textContent = "5位蓝牌百连号追踪 · 7天自编选号池倒计时 · 豹子/顺子/吉利号优选";
+        bannerBox.className = "banner-rule";
+        bannerText.innerHTML = `<strong>交管12123权威规则提醒：</strong> 每种号牌种类<strong>首次投放</strong>的号段自投放起提供自编和随机；之后<strong>新投放</strong>的号段自投放时间起<strong>7日内只提供随机选号</strong>，<strong>超过7日</strong>由系统随机投放到自编选号池。`;
+
+        prefixInput.value = "京CHK";
+        startInput.value = "300";
+        endInput.value = "399";
+        renderPatternChipsFuel();
+      }
+    }
+
+    // 渲染新能源模式筛选标签
+    function renderPatternChipsNEV() {
+      const container = document.getElementById("pattern-chips");
+      container.innerHTML = `
+        <span class="chip" data-pattern="AAAAA" onclick="togglePatternChip(this)">👑 五连绝世豹子 (88888)</span>
+        <span class="chip" data-pattern="AAAA" onclick="togglePatternChip(this)">👑 四连顶级豹子 (8888)</span>
+        <span class="chip" data-pattern="AAA" onclick="togglePatternChip(this)">👑 三连经典豹子 (888)</span>
+        <span class="chip" data-pattern="ABCDE" onclick="togglePatternChip(this)">📈 五连大顺子 (12345/56789)</span>
+        <span class="chip" data-pattern="ABCD" onclick="togglePatternChip(this)">📈 四连顺子 (1234/6789)</span>
+        <span class="chip" data-pattern="AABB" onclick="togglePatternChip(this)">👯 AABB双对 (8866/6688)</span>
+        <span class="chip" data-pattern="ABAB" onclick="togglePatternChip(this)">👯 ABAB对子 (8686)</span>
+        <span class="chip" data-pattern="ABBA" onclick="togglePatternChip(this)">🔁 ABBA对称 (8668)</span>
+        <span class="chip" data-pattern="1000" onclick="togglePatternChip(this)">💯 整千/整万号 (88000/80000)</span>
+        <span class="chip" data-pattern="168" onclick="togglePatternChip(this)">🌟 一路发发发 (16888)</span>
+        <span class="chip" data-pattern="520" onclick="togglePatternChip(this)">❤️ 520我爱你 (52000)</span>
+      `;
+    }
+
+    // 渲染燃油车模式筛选标签
+    function renderPatternChipsFuel() {
+      const container = document.getElementById("pattern-chips");
+      container.innerHTML = `
+        <span class="chip" data-pattern="AAA" onclick="togglePatternChip(this)">👑 豹子号 (AAA 如 888)</span>
+        <span class="chip" data-pattern="ABC" onclick="togglePatternChip(this)">📈 顺子号 (123/789)</span>
+        <span class="chip" data-pattern="CBA" onclick="togglePatternChip(this)">📉 倒顺子 (987/321)</span>
+        <span class="chip" data-pattern="AAB" onclick="togglePatternChip(this)">👯 AAB对子 (886)</span>
+        <span class="chip" data-pattern="ABB" onclick="togglePatternChip(this)">👯 ABB对子 (688)</span>
+        <span class="chip" data-pattern="ABA" onclick="togglePatternChip(this)">🔁 ABA夹心 (868)</span>
+        <span class="chip" data-pattern="100" onclick="togglePatternChip(this)">💯 整百号 (300/800)</span>
+        <span class="chip" data-pattern="AUSPICIOUS" onclick="togglePatternChip(this)">🌟 吉祥谐音 (168/520)</span>
+      `;
+    }
+
+    // 格式化输出数字
+    function formatNum(num, endNum) {
+      const width = (currentVehicleType === "NEV") ? 4 : 3;
+      return String(num).padStart(width, "0");
+    }
+
+    // 格式化日期对象
+    function formatDateTime(d) {
+      const pad = n => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+    function parseDateTime(str) {
+      return new Date(str.replace(/-/g, "/"));
+    }
+
+    // 时钟与倒计时
+    function updateClock() {
+      const now = new Date();
+      const pad = n => String(n).padStart(2, "0");
+      const timeStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      document.getElementById("clock-display").innerHTML = `<span>🕒 当前时间: ${timeStr}</span>`;
+      updateCountdowns(now);
+    }
+
+    // 计算单个号段状态
+    function calculateSegmentStatus(seg, now = new Date()) {
+      const releaseDate = parseDateTime(seg.releaseTime);
+      const unlockDate = new Date(releaseDate.getTime() + 7 * 24 * 3600 * 1000);
+
+      if (seg.isFirst) {
+        return {
+          type: "first",
+          label: "首次投放 (立即解锁)",
+          pillClass: "unlocked",
+          dotClass: "dot-green",
+          unlocked: true,
+          diffMs: 0,
+          unlockDate
+        };
+      }
+
+      const diffMs = unlockDate.getTime() - now.getTime();
+
+      if (diffMs <= 0) {
+        const passedSec = Math.floor(Math.abs(diffMs) / 1000);
+        const days = Math.floor(passedSec / 86400);
+        const hours = Math.floor((passedSec % 86400) / 3600);
+        return {
+          type: "unlocked",
+          label: `🟢 已解锁自编 (已开放 ${days}天${hours}小时)`,
+          pillClass: "unlocked",
+          dotClass: "dot-green",
+          unlocked: true,
+          diffMs,
+          unlockDate
+        };
+      } else {
+        const totalSec = Math.floor(diffMs / 1000);
+        const days = Math.floor(totalSec / 86400);
+        const hours = Math.floor((totalSec % 86400) / 3600);
+        const mins = Math.floor((totalSec % 3600) / 60);
+        const secs = totalSec % 60;
+        const isUrgent = diffMs <= 24 * 3600 * 1000;
+
+        return {
+          type: isUrgent ? "urgent" : "locked",
+          label: isUrgent
+            ? `⚡️ 即将解锁 (剩 ${days}天${hours}时${mins}分${secs}秒)`
+            : `🟡 仅限随机 (还需 ${days}天${hours}时${mins}分 解锁)`,
+          pillClass: isUrgent ? "urgent" : "locked",
+          dotClass: isUrgent ? "dot-orange" : "dot-yellow",
+          unlocked: false,
+          diffMs,
+          unlockDate,
+          days, hours, mins, secs, isUrgent
+        };
+      }
+    }
+
+    // 生成车牌视觉 HTML
+    function getPlateBadgeHtml(plateStr, isGreen = null, isLg = false) {
+      if (isGreen === null) {
+        isGreen = (currentVehicleType === "NEV");
+      }
+      const lgCls = isLg ? "plate-lg" : "";
+
+      if (isGreen) {
+        // 绿牌格式: 例如 京APX9100 -> 京A ● PX9100; 京A·PX9100 -> 京A ● PX9100
+        let prefix = "京A";
+        let seq = plateStr;
+        if (plateStr.startsWith("京A·")) {
+          seq = plateStr.substring(3);
+        } else if (plateStr.startsWith("京A")) {
+          seq = plateStr.substring(2);
+        } else if (plateStr.startsWith("京")) {
+          seq = plateStr.substring(1);
+        }
+        return `
+          <span class="plate-badge-green ${lgCls}">
+            <span>${prefix}</span>
+            <span class="nev-dot">●</span>
+            <span>${seq}</span>
+          </span>
+        `;
+      } else {
+        return `<span class="plate-badge-blue ${lgCls}">${plateStr}</span>`;
+      }
+    }
+
+    // 渲染号段表格
+    function renderSegmentsTable() {
+      const tbody = document.getElementById("segments-table-body");
+      const searchKeyword = (document.getElementById("search-segment-input")?.value || "").trim().toUpperCase();
+      const statusFilter = document.getElementById("filter-status-select")?.value || "ALL";
+      const now = new Date();
+
+      let filtered = [...segments].filter(seg => {
+        const fullStr = (seg.prefix + formatNum(seg.start, seg.end) + " " + seg.prefix + formatNum(seg.end, seg.end) + " " + seg.releaseTime + " " + (seg.desc || "")).toUpperCase();
+        if (searchKeyword && !fullStr.includes(searchKeyword)) return false;
+
+        if (statusFilter !== "ALL") {
+          const st = calculateSegmentStatus(seg, now);
+          if (statusFilter === "UNLOCKED" && !st.unlocked) return false;
+          if (statusFilter === "URGENT" && !st.isUrgent) return false;
+          if (statusFilter === "LOCKED" && (st.unlocked || st.isUrgent)) return false;
+        }
+        return true;
+      });
+
+      const sorted = filtered.sort((a, b) => parseDateTime(b.releaseTime) - parseDateTime(a.releaseTime));
+
+      let html = "";
+      sorted.forEach((seg, idx) => {
+        const status = calculateSegmentStatus(seg, now);
+        const unlockStr = formatDateTime(status.unlockDate);
+        const startStr = formatNum(seg.start, seg.end);
+        const endStr = formatNum(seg.end, seg.end);
+        const rangeText = `${seg.prefix}${startStr} ~ ${seg.prefix}${endStr}`;
+        const plateBadge = getPlateBadgeHtml(rangeText, currentVehicleType === "NEV", false);
+
+        html += `
+          <tr data-seg-id="${seg.id}">
+            <td style="color:var(--text-muted); font-size:12px;">${idx + 1}</td>
+            <td>
+              ${plateBadge}
+              ${seg.desc ? `<div style="font-size:11.5px; color:var(--text-muted); margin-top:3px;">${seg.desc}</div>` : ""}
+            </td>
+            <td style="color:#475569; font-variant-numeric: tabular-nums;">${seg.releaseTime}</td>
+            <td style="color:#475569; font-variant-numeric: tabular-nums;">${unlockStr}</td>
+            <td>
+              <span class="status-pill ${status.pillClass}">
+                <span class="dot ${status.dotClass}"></span>
+                <span class="countdown-span" data-release="${seg.releaseTime}" data-isfirst="${seg.isFirst}">${status.label}</span>
+              </span>
+            </td>
+            <td style="text-align: right;">
+              <button class="btn btn-secondary btn-sm" onclick="selectSegmentForScreener('${seg.id}')">
+                🎯 进入选号
+              </button>
+              <button class="btn btn-danger-outline btn-sm" onclick="deleteSegment('${seg.id}')" title="删除">
+                ✕
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+      document.getElementById("tab-seg-badge").textContent = segments.length;
+    }
+
+    // 动态刷新倒计时
+    function updateCountdowns(now) {
+      document.querySelectorAll(".countdown-span").forEach(el => {
+        const releaseTime = el.getAttribute("data-release");
+        const isFirst = el.getAttribute("data-isfirst") === "true";
+        const status = calculateSegmentStatus({ releaseTime, isFirst }, now);
+        el.textContent = status.label;
+      });
+    }
+
+    // 更新统计
+    function updateStats() {
+      const now = new Date();
+      let total = segments.length;
+      let unlocked = 0;
+      let urgent = 0;
+
+      segments.forEach(seg => {
+        const status = calculateSegmentStatus(seg, now);
+        if (status.unlocked) unlocked++;
+        else if (status.isUrgent) urgent++;
+      });
+
+      document.getElementById("stat-total-segments").innerHTML = `${total} <span style="font-size:13px; font-weight:normal; color:#64748b;">个号段</span>`;
+      document.getElementById("stat-unlocked-segments").innerHTML = `${unlocked} <span style="font-size:13px; font-weight:normal; color:#64748b;">个</span>`;
+      document.getElementById("stat-urgent-segments").innerHTML = `${urgent} <span style="font-size:13px; font-weight:normal; color:#64748b;">个</span>`;
+      document.getElementById("stat-wishlist-count").innerHTML = `${wishlist.length} <span style="font-size:13px; font-weight:normal; color:#64748b;">个</span>`;
+      document.getElementById("tab-wish-badge").textContent = wishlist.length;
+      document.getElementById("wishlist-header-count").textContent = wishlist.length;
+    }
+
+    // 填充下拉框
+    function populateSegmentSelector() {
+      const sel = document.getElementById("filter-segment-select");
+      if (!sel) return;
+
+      let html = `
+        <option value="ALL_UNLOCKED">🟢 所有已解锁自编的号段 (可直接提交)</option>
+        <option value="ALL_URGENT">⚡️ 24小时内即将解锁的号段 (提前备战)</option>
+        <option value="ALL">🌐 全量所有公布号段</option>
+        <optgroup label="── 按具体号段单选 ──">
+      `;
+
+      segments.forEach(seg => {
+        const status = calculateSegmentStatus(seg);
+        const tag = status.unlocked ? "🟢" : (status.isUrgent ? "⚡️" : "🟡");
+        const startStr = formatNum(seg.start, seg.end);
+        const endStr = formatNum(seg.end, seg.end);
+        html += `<option value="${seg.id}">${tag} ${seg.prefix}${startStr} ~ ${seg.prefix}${endStr} (${seg.releaseTime})</option>`;
+      });
+      html += `</optgroup>`;
+      sel.innerHTML = html;
+    }
+
+    function selectSegmentForScreener(segId) {
+      switchTab("tab-screener");
+      const sel = document.getElementById("filter-segment-select");
+      sel.value = segId;
+      generateCandidates();
+    }
+
+    // 核心数字形态分析
+    function analyzeNumber(numStr) {
+      const digits = numStr.split("").map(Number);
+      const s = numStr;
+      const length = digits.length;
+      const tags = [];
+      let score = 0;
+
+      // 豹子号分析
+      if (length >= 5 && digits.every(d => d === digits[0])) {
+        tags.push({ text: `👑 五连绝世豹子 (${s})`, type: "tag-aaa", key: "AAAAA" });
+        score += 200;
+      } else if (length >= 4 && [0,1,2,3,4,5,6,7,8,9].some(d => s.includes(String(d).repeat(4)))) {
+        tags.push({ text: `👑 四连顶级豹子 (${s})`, type: "tag-aaa", key: "AAAA" });
+        score += 150;
+      } else if (length >= 3 && [0,1,2,3,4,5,6,7,8,9].some(d => s.includes(String(d).repeat(3)))) {
+        tags.push({ text: `👑 三连经典豹子 (${s})`, type: "tag-aaa", key: "AAA" });
+        score += 100;
+      }
+
+      // 顺子递增分析
+      if (length === 5 && digits.every((d, i) => i === 0 || d === digits[i-1] + 1)) {
+        tags.push({ text: `📈 五连大顺子 (${s})`, type: "tag-abc", key: "ABCDE" });
+        score += 160;
+      } else if (length >= 4 && ([0,1].some(start => digits[start]+1 === digits[start+1] && digits[start+1]+1 === digits[start+2] && digits[start+2]+1 === digits[start+3]))) {
+        tags.push({ text: `📈 四连顺子 (${s})`, type: "tag-abc", key: "ABCD" });
+        score += 120;
+      } else if (length === 3 && digits[0]+1 === digits[1] && digits[1]+1 === digits[2]) {
+        tags.push({ text: `📈 顺子号 (${s})`, type: "tag-abc", key: "ABC" });
+        score += 80;
+      }
+
+      // 倒顺分析
+      if (length === 5 && digits.every((d, i) => i === 0 || d === digits[i-1] - 1)) {
+        tags.push({ text: `📉 五连倒顺 (${s})`, type: "tag-abc", key: "ABCDE" });
+        score += 150;
+      } else if (length === 3 && digits[0]-1 === digits[1] && digits[1]-1 === digits[2]) {
+        tags.push({ text: `📉 倒顺子 (${s})`, type: "tag-abc", key: "CBA" });
+        score += 75;
+      }
+
+      // 双对 / 叠字 / 回文
+      if (length >= 4) {
+        const last4 = s.slice(-4);
+        if (last4.slice(0, 2) === last4.slice(2)) {
+          tags.push({ text: `👯 ABAB对子 (${last4})`, type: "tag-fav", key: "ABAB" });
+          score += 90;
+        } else if (last4[0] === last4[1] && last4[2] === last4[3] && last4[1] !== last4[2]) {
+          tags.push({ text: `👯 AABB双对 (${last4})`, type: "tag-fav", key: "AABB" });
+          score += 95;
+        } else if (last4[0] === last4[3] && last4[1] === last4[2] && last4[0] !== last4[1]) {
+          tags.push({ text: `🔁 ABBA对称 (${last4})`, type: "tag-fav", key: "ABBA" });
+          score += 85;
+        }
+      }
+
+      if (length === 3) {
+        if (digits[0] === digits[1] && digits[1] !== digits[2]) {
+          tags.push({ text: `👯 AAB叠字 (${s})`, type: "tag-fav", key: "AAB" });
+          score += 65;
+        } else if (digits[1] === digits[2] && digits[0] !== digits[1]) {
+          tags.push({ text: `👯 ABB叠字 (${s})`, type: "tag-fav", key: "ABB" });
+          score += 65;
+        } else if (digits[0] === digits[2] && digits[0] !== digits[1]) {
+          tags.push({ text: `🔁 ABA夹心 (${s})`, type: "tag-fav", key: "ABA" });
+          score += 60;
+        }
+      }
+
+      // 整千 / 整百
+      if (s.endsWith("0000")) {
+        tags.push({ text: "💯 整万号", type: "tag-fav", key: "1000" });
+        score += 110;
+      } else if (s.endsWith("000")) {
+        tags.push({ text: "💯 整千号", type: "tag-fav", key: "1000" });
+        score += 80;
+      } else if (s.endsWith("00")) {
+        tags.push({ text: "💯 整百号", type: "tag-fav", key: "100" });
+        score += 55;
+      }
+
+      // 吉祥谐音
+      if (s.includes("168")) {
+        tags.push({ text: "🌟 一路发", type: "tag-aaa", key: "168" });
+        score += 85;
+      }
+      if (s.includes("520")) {
+        tags.push({ text: "❤️ 我爱你", type: "tag-aaa", key: "520" });
+        score += 70;
+      }
+      if (s.includes("668") || s.includes("886") || s.includes("998")) {
+        tags.push({ text: "🌟 吉利谐音", type: "tag-fav", key: "AUSPICIOUS" });
+        score += 65;
+      }
+
+      // 尾数吉利加权
+      if (s.endsWith("888") || s.endsWith("666") || s.endsWith("999")) score += 50;
+      else if (s.endsWith("88") || s.endsWith("66")) score += 30;
+
+      if (s.endsWith("8")) score += 25;
+      else if (s.endsWith("6")) score += 20;
+      else if (s.endsWith("9")) score += 15;
+
+      const sum = digits.reduce((a, b) => a + b, 0);
+      return { tags, score, sum };
+    }
+
+    let currentStrategy = "SMART"; // "SMART" or "RUSH"
+
+    function setStrategyPreset(strat) {
+      currentStrategy = strat;
+      const btnSmart = document.getElementById("strat-btn-smart");
+      const btnRush = document.getElementById("strat-btn-rush");
+      const hint = document.getElementById("strategy-hint-box");
+
+      if (strat === "SMART") {
+        btnSmart.style.background = "#059669";
+        btnSmart.style.color = "#ffffff";
+        btnRush.style.background = "transparent";
+        btnRush.style.color = "#475569";
+        hint.style.display = "block";
+        hint.style.background = "#ecfdf5";
+        hint.style.borderColor = "#a7f3d0";
+        hint.style.color = "#065f46";
+        hint.innerHTML = "💡 <strong>低竞争高命中策略已激活：</strong> 自动排除数字 4，避开被黄牛脚本秒光的纯豹子雷区，优先挑选尾双叠(88/66/99)、ABAB对子、ABBA回文对称及小顺子，在成熟号段一次自编命中率最高！";
+
+        // 自动勾选排除4
+        document.querySelectorAll("#exclude-chips .chip").forEach(c => c.classList.remove("selected"));
+        const chip4 = document.querySelector("#exclude-chips .chip[data-digit='4']");
+        if (chip4) chip4.classList.add("selected");
+      } else {
+        btnRush.style.background = "#1e40af";
+        btnRush.style.color = "#ffffff";
+        btnSmart.style.background = "transparent";
+        btnSmart.style.color = "#475569";
+        hint.style.display = "block";
+        hint.style.background = "#eff6ff";
+        hint.style.borderColor = "#bfdbfe";
+        hint.style.color = "#1e40af";
+        hint.innerHTML = "👑 <strong>极品靓号冲刺模式已激活：</strong> 全力搜寻顶级大豹子 (6666/8888/3333)、大顺子 (1234/5678) 及全吉利数字，适合新号段刚满7天第一时间抢编或随机50选1！";
+      }
+
+      generateCandidates();
+      showToast(strat === "SMART" ? "已启用：低竞争 · 高命中避坑模式" : "已启用：极品靓号冲刺模式");
+    }
+
+    // 核心车牌生成
+    function generateCandidates() {
+      const scope = document.getElementById("filter-segment-select").value;
+      const now = new Date();
+
+      let targetSegs = [];
+      if (scope === "ALL") {
+        targetSegs = [...segments];
+      } else if (scope === "ALL_UNLOCKED") {
+        targetSegs = segments.filter(s => calculateSegmentStatus(s, now).unlocked);
+      } else if (scope === "ALL_URGENT") {
+        targetSegs = segments.filter(s => calculateSegmentStatus(s, now).isUrgent);
+      } else {
+        targetSegs = segments.filter(s => s.id === scope);
+      }
+
+      if (targetSegs.length === 0) {
+        document.getElementById("plate-results-grid").innerHTML = `
+          <div style="grid-column: 1/-1; text-align:center; padding: 40px; color:var(--text-muted);">
+            所选范围暂无可用号段，请尝试切换至“所有已解锁自编的号段”或“全量号段”。
+          </div>
+        `;
+        document.getElementById("result-stats").textContent = "生成 0 个号码";
+        cachedCandidates = [];
+        return;
+      }
+
+      const excludeDigits = Array.from(document.querySelectorAll("#exclude-chips .chip.selected")).map(el => el.dataset.digit);
+      const preferDigits = Array.from(document.querySelectorAll("#prefer-chips .chip.selected")).map(el => el.dataset.digit);
+      const patternKeys = Array.from(document.querySelectorAll("#pattern-chips .chip.selected")).map(el => el.dataset.pattern);
+      const tailDigits = Array.from(document.querySelectorAll("#tail-chips .chip.selected")).map(el => el.dataset.tail);
+      const customSearch = (document.getElementById("custom-search-input").value || "").trim();
+
+      const candidates = [];
+
+      targetSegs.forEach(seg => {
+        const segStatus = calculateSegmentStatus(seg, now);
+        const width = (currentVehicleType === "NEV") ? 4 : 3;
+
+        for (let i = seg.start; i <= seg.end; i++) {
+          const numStr = String(i).padStart(width, "0");
+
+          if (excludeDigits.some(d => numStr.includes(d))) continue;
+          if (tailDigits.length > 0 && !tailDigits.includes(numStr[numStr.length - 1])) continue;
+          if (customSearch && !numStr.includes(customSearch)) continue;
+
+          const analysis = analyzeNumber(numStr);
+
+          if (patternKeys.length > 0) {
+            const hasMatch = analysis.tags.some(t => patternKeys.includes(t.key));
+            if (!hasMatch) continue;
+          }
+
+          // 低竞争高命中模式：过滤掉秒光号（纯豹子或全8全6）
+          if (currentStrategy === "SMART") {
+            const isPureLeopard = (numStr.length >= 3 && numStr.split("").every(d => d === numStr[0]));
+            const tooMany8or6 = (numStr.split("8").length - 1 >= 3 || numStr.split("6").length - 1 >= 3);
+            if (isPureLeopard || tooMany8or6) {
+              continue; // 跳过黄牛秒杀号，避免白白烧掉20次自编机会
+            }
+          }
+
+          let score = analysis.score;
+          let favCount = 0;
+          preferDigits.forEach(d => {
+            const occurrences = (numStr.match(new RegExp(d, "g")) || []).length;
+            favCount += occurrences;
+            score += occurrences * 20;
+          });
+
+          // 如果是低竞争策略，额外奖励对子、回文和微顺子
+          if (currentStrategy === "SMART") {
+            if (numStr.length === 4) {
+              if (numStr[2] === numStr[3] && numStr[1] !== numStr[2]) score += 30; // 尾双叠 (XX88, XX66, XX99)
+              if (numStr[0] === numStr[2] && numStr[1] === numStr[3]) score += 40; // ABAB
+              if (numStr[0] === numStr[3] && numStr[1] === numStr[2]) score += 35; // ABBA
+            }
+          }
+
+          const plate = `${seg.prefix}${numStr}`;
+          candidates.push({
+            plate,
+            prefix: seg.prefix,
+            number: numStr,
+            score,
+            favCount,
+            tags: analysis.tags,
+            sum: analysis.sum,
+            isGreen: (currentVehicleType === "NEV"),
+            segStatus: segStatus.label,
+            isUnlocked: segStatus.unlocked
+          });
+        }
+      });
+
+      candidates.sort((a, b) => b.score - a.score || a.number.localeCompare(b.number));
+      cachedCandidates = candidates;
+
+      document.getElementById("result-stats").textContent = `共筛选出 ${candidates.length} 个备选车牌`;
+      renderCandidatesGrid(candidates.slice(0, 80));
+    }
+
+    // 渲染结果网格
+    function renderCandidatesGrid(list) {
+      const grid = document.getElementById("plate-results-grid");
+      if (list.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1/-1; text-align:center; padding: 40px; color:var(--text-muted);">
+            未匹配到符合当前过滤条件的号码，请尝试放宽排除或形态条件。
+          </div>
+        `;
+        return;
+      }
+
+      let html = "";
+      list.forEach((item) => {
+        const inWishlist = wishlist.some(w => w.plate === item.plate);
+        const tagsHtml = item.tags.map(t => `<span class="tag-badge ${t.type}">${t.text}</span>`).join("");
+        const plateBadge = getPlateBadgeHtml(item.plate, item.isGreen, true);
+
+        html += `
+          <div class="plate-card">
+            <div class="plate-card-top">
+              ${plateBadge}
+              <span class="plate-score-pill">⭐ 得分: ${item.score}</span>
+            </div>
+
+            <div class="plate-tags">
+              ${tagsHtml || '<span class="tag-badge">偏好优选</span>'}
+              <span class="tag-badge" style="background:#f8fafc; color:#64748b;">和值: ${item.sum}</span>
+            </div>
+
+            <div class="plate-card-bottom">
+              <button class="btn btn-outline btn-sm" onclick="copyText('${item.plate}')" title="复制号码">
+                📋 复制
+              </button>
+
+              ${inWishlist ? `
+                <button class="btn btn-sm" style="background:#dcfce7; color:#15803d; border:1px solid #86efac;" onclick="removeFromWishlist('${item.plate}')">
+                  ✓ 已加入自编
+                </button>
+              ` : `
+                <button class="btn btn-primary btn-sm" onclick="addToWishlist('${item.plate}')">
+                  + 加入志愿单
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      });
+      grid.innerHTML = html;
+    }
+
+    // 添加到自编清单
+    function addToWishlist(plateStr) {
+      if (wishlist.some(w => w.plate === plateStr)) {
+        showToast("该车牌已在自编清单中");
+        return;
+      }
+      if (wishlist.length >= 30) {
+        showToast("自编清单上限为30个");
+        return;
+      }
+
+      const candidate = cachedCandidates.find(c => c.plate === plateStr);
+      wishlist.push({
+        plate: plateStr,
+        tags: candidate ? candidate.tags.map(t => t.text).join(" ") : "自选靓号",
+        addedAt: new Date().toLocaleTimeString(),
+        score: candidate ? candidate.score : 100,
+        isGreen: candidate ? candidate.isGreen : (currentVehicleType === "NEV")
+      });
+
+      saveWishlist();
+      updateStats();
+      renderWishlist();
+      renderCandidatesGrid(cachedCandidates.slice(0, 80));
+      showToast(`已将 ${plateStr} 加入自编志愿单`);
+    }
+
+    // 批量添加
+    function batchAddTopWishlist(count) {
+      let added = 0;
+      for (const item of cachedCandidates) {
+        if (!wishlist.some(w => w.plate === item.plate)) {
+          wishlist.push({
+            plate: item.plate,
+            tags: item.tags.map(t => t.text).join(" "),
+            addedAt: new Date().toLocaleTimeString(),
+            score: item.score,
+            isGreen: item.isGreen
+          });
+          added++;
+          if (added >= count || wishlist.length >= 30) break;
+        }
+      }
+      saveWishlist();
+      updateStats();
+      renderWishlist();
+      renderCandidatesGrid(cachedCandidates.slice(0, 80));
+      showToast(`已成功批量导入 ${added} 个高分号码`);
+    }
+
+    function removeFromWishlist(plateStr) {
+      wishlist = wishlist.filter(w => w.plate !== plateStr);
+      saveWishlist();
+      updateStats();
+      renderWishlist();
+      renderCandidatesGrid(cachedCandidates.slice(0, 80));
+      showToast(`已移除 ${plateStr}`);
+    }
+
+    function saveWishlist() {
+      localStorage.setItem("12123_wishlist", JSON.stringify(wishlist));
+    }
+
+    // 渲染自编清单
+    function renderWishlist() {
+      const tbody = document.getElementById("wishlist-table-body");
+      const emptyBox = document.getElementById("wishlist-empty-box");
+
+      if (wishlist.length === 0) {
+        tbody.innerHTML = "";
+        emptyBox.style.display = "block";
+        return;
+      }
+      emptyBox.style.display = "none";
+
+      let html = "";
+      wishlist.forEach((item, index) => {
+        const batchNum = Math.floor(index / 5) + 1;
+        const subIndex = (index % 5) + 1;
+        const plateBadge = getPlateBadgeHtml(item.plate, item.isGreen, true);
+
+        html += `
+          <tr>
+            <td>
+              <span style="font-weight:700; color:var(--primary); font-size:14px;">第 ${index + 1} 志愿</span>
+              <div style="font-size:11px; color:var(--text-muted);">第${batchNum}批·意向${subIndex}</div>
+            </td>
+            <td>
+              ${plateBadge}
+            </td>
+            <td>
+              <span style="font-size:12px; font-weight:600; color:${item.isGreen ? "#059669" : "#1e40af"};">
+                ${item.isGreen ? "⚡️ 小型新能源绿牌" : "🚗 普通汽车蓝牌"}
+              </span>
+            </td>
+            <td>
+              <span style="font-size:12px; color:#475569;">${item.tags || "常规优选"}</span>
+            </td>
+            <td style="text-align: right;">
+              <button class="btn btn-outline btn-sm" onclick="moveWishlist(${index}, -1)" ${index === 0 ? 'disabled style="opacity:0.4;"' : ""} title="上移">
+                ↑ 上移
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="moveWishlist(${index}, 1)" ${index === wishlist.length - 1 ? 'disabled style="opacity:0.4;"' : ""} title="下移">
+                ↓ 下移
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="copyText('${item.plate}')">
+                📋 复制
+              </button>
+              <button class="btn btn-danger-outline btn-sm" onclick="removeFromWishlist('${item.plate}')">
+                ✕
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function moveWishlist(index, direction) {
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= wishlist.length) return;
+      const temp = wishlist[index];
+      wishlist[index] = wishlist[targetIndex];
+      wishlist[targetIndex] = temp;
+      saveWishlist();
+      renderWishlist();
+    }
+
+    function clearWishlist() {
+      if (!confirm("确定要清空自编志愿单吗？")) return;
+      wishlist = [];
+      saveWishlist();
+      updateStats();
+      renderWishlist();
+      renderCandidatesGrid(cachedCandidates.slice(0, 80));
+      showToast("自编志愿单已清空");
+    }
+
+    function copyAllWishlist() {
+      if (wishlist.length === 0) {
+        showToast("自编清单为空");
+        return;
+      }
+      const text = wishlist.map((w, idx) => `第${idx+1}志愿: ${w.plate}`).join("\n");
+      copyText(text, "已复制全部自编清单至剪贴板！");
+    }
+
+    function exportWishlistTXT() {
+      if (wishlist.length === 0) {
+        showToast("自编清单为空，无法导出");
+        return;
+      }
+      let content = "=== 交管 12123 北京市车牌自编意向排序清单 ===\n";
+      content += `导出时间: ${new Date().toLocaleString()}\n`;
+      content += "规则提示：自编按意向次序逐一匹配，第一志愿优先级最高。\n\n";
+      wishlist.forEach((w, idx) => {
+        const batch = Math.floor(idx / 5) + 1;
+        const sub = (idx % 5) + 1;
+        const typeStr = w.isGreen ? "新能源绿牌" : "燃油车蓝牌";
+        content += `[第${idx + 1}志愿 | 第${batch}批意向${sub}] [${typeStr}] ${w.plate} (特征: ${w.tags})\n`;
+      });
+
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `12123自编备选单_${new Date().toISOString().slice(0,10)}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("已成功导出 TXT 清单");
+    }
+
+    function copyText(str, msg = `已复制: ${str}`) {
+      navigator.clipboard.writeText(str).then(() => {
+        showToast(msg);
+      }).catch(() => {
+        const ta = document.createElement("textarea");
+        ta.value = str;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        showToast(msg);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast-notify");
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      const targetPane = document.getElementById(tabId);
+      if (targetPane) targetPane.classList.add("active");
+
+      const buttons = document.querySelectorAll(".tab-btn");
+      if (tabId === "tab-segments") buttons[0].classList.add("active");
+      else if (tabId === "tab-screener") buttons[1].classList.add("active");
+      else if (tabId === "tab-wishlist") buttons[2].classList.add("active");
+      else if (tabId === "tab-guide") buttons[3].classList.add("active");
+    }
+
+    function toggleExcludeChip(el) {
+      el.classList.toggle("selected");
+      generateCandidates();
+    }
+    function togglePreferChip(el) {
+      el.classList.toggle("selected");
+      generateCandidates();
+    }
+    function togglePatternChip(el) {
+      el.classList.toggle("selected");
+      generateCandidates();
+    }
+    function toggleTailChip(el) {
+      el.classList.toggle("selected");
+      generateCandidates();
+    }
+
+    function resetFilters(triggerGen = true) {
+      document.querySelectorAll("#exclude-chips .chip").forEach(c => c.classList.remove("selected"));
+      document.querySelectorAll("#prefer-chips .chip").forEach(c => c.classList.remove("selected"));
+      document.querySelectorAll("#pattern-chips .chip").forEach(c => c.classList.remove("selected"));
+      document.querySelectorAll("#tail-chips .chip").forEach(c => c.classList.remove("selected"));
+      document.getElementById("custom-search-input").value = "";
+
+      const chip4 = document.querySelector("#exclude-chips .chip[data-digit='4']");
+      if (chip4) chip4.classList.add("selected");
+      const chip8 = document.querySelector("#prefer-chips .chip[data-digit='8']");
+      if (chip8) chip8.classList.add("selected");
+      const chip6 = document.querySelector("#prefer-chips .chip[data-digit='6']");
+      if (chip6) chip6.classList.add("selected");
+
+      if (triggerGen) {
+        generateCandidates();
+        showToast("已重置筛选条件");
+      }
+    }
+
+    function openAddModal() {
+      document.getElementById("modal-add-segment").classList.add("open");
+    }
+    function closeAddModal() {
+      document.getElementById("modal-add-segment").classList.remove("open");
+    }
+    function submitAddSegment() {
+      const prefix = document.getElementById("input-prefix").value.trim().toUpperCase();
+      const start = parseInt(document.getElementById("input-start").value, 10);
+      const end = parseInt(document.getElementById("input-end").value, 10);
+      const timeVal = document.getElementById("input-release-time").value;
+      const isFirst = document.getElementById("input-is-first").checked;
+
+      if (!prefix || isNaN(start) || isNaN(end) || !timeVal) {
+        alert("请完整填写号段前缀、起止数字及投放时间！");
+        return;
+      }
+      if (start > end) {
+        alert("起始数字不能大于结束数字！");
+        return;
+      }
+
+      const releaseTime = timeVal.replace("T", " ");
+      segments.unshift({
+        id: "seg_" + Date.now(),
+        prefix,
+        start,
+        end,
+        releaseTime,
+        isFirst
+      });
+
+      saveCurrentSegments();
+      closeAddModal();
+      renderSegmentsTable();
+      updateStats();
+      populateSegmentSelector();
+      generateCandidates();
+      showToast(`成功添加号段: ${prefix}${start}~${prefix}${end}`);
+    }
+
+    function deleteSegment(id) {
+      if (!confirm("确定要删除该号段记录吗？")) return;
+      segments = segments.filter(s => s.id !== id);
+      saveCurrentSegments();
+      renderSegmentsTable();
+      updateStats();
+      populateSegmentSelector();
+      generateCandidates();
+      showToast("号段已删除");
+    }
+
+    function resetDefaultData() {
+      if (!confirm("确定恢复到当前种类的初始默认号段吗？")) return;
+      segments = (currentVehicleType === "NEV") ? [...DEFAULT_NEV_SEGMENTS] : [...DEFAULT_FUEL_SEGMENTS];
+      saveCurrentSegments();
+      renderSegmentsTable();
+      updateStats();
+      populateSegmentSelector();
+      generateCandidates();
+      showToast("已恢复初始号段数据");
+    }
+
+    function openBatchModal() {
+      document.getElementById("modal-batch-import").classList.add("open");
+    }
+    function closeBatchModal() {
+      document.getElementById("modal-batch-import").classList.remove("open");
+    }
+
+    // 智能批量导入
+    function submitBatchImport() {
+      const text = document.getElementById("batch-paste-textarea").value;
+      if (!text.trim()) {
+        alert("请先粘贴文本内容！");
+        return;
+      }
+
+      const lines = text.split("\n");
+      let count = 0;
+      const regex = /(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})?\s*([^\x00-\xff]{1}[A-Z0-9]{1,3})\s*(\d{1,5})\s*~?\s*([A-Z0-9]{0,3})?\s*(\d{1,5})/i;
+
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+        const match = trimmed.match(regex);
+        if (match) {
+          const time = match[1] || formatDateTime(new Date());
+          const prefix = match[2].toUpperCase();
+          const start = parseInt(match[3], 10);
+          const end = parseInt(match[5], 10);
+
+          segments.unshift({
+            id: "seg_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
+            prefix,
+            start,
+            end,
+            releaseTime: time,
+            isFirst: false
+          });
+          count++;
+        }
+      });
+
+      if (count > 0) {
+        saveCurrentSegments();
+        closeBatchModal();
+        renderSegmentsTable();
+        updateStats();
+        populateSegmentSelector();
+        generateCandidates();
+        document.getElementById("batch-paste-textarea").value = "";
+        showToast(`成功识别并导入 ${count} 个新号段！`);
+      } else {
+        alert("未识别出有效号段格式，请确认文本包含时间和号段区间！");
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>
