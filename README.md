@@ -20,9 +20,9 @@
 
 ## 🌐 使用方式
 
-- 打开部署站点 [12123.dragonkingai.com](https://12123.dragonkingai.com/) 使用网页版选号沙盘。
+- 打开部署站点 [dragonkingai.com/num](https://dragonkingai.com/num/) 使用网页版选号沙盘。
 - 直接打开仓库中的 [`index.html`](./index.html) 也可以离线使用沙盘（无需依赖）。
-- 需要加密选号助手时，打开 [`helper.html`](./helper.html)，输入密码解锁。
+- 需要加密选号助手时，打开部署站点，输入你保存的访问密码解锁；密码不写入公开仓库。
 
 ---
 
